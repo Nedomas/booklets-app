@@ -19,11 +19,16 @@ var styles = StyleSheet.create({
   container: {
     flex: 1,
     margin: 20,
+    marginTop: 80,
   },
   label: {
-    marginTop: 80,
     paddingBottom: 20,
     fontSize: 20,
+  },
+  step: {
+    paddingBottom: 20,
+    fontSize: 12,
+    textAlign: 'center',
   },
   input: {
     height: 40,
@@ -98,7 +103,7 @@ module.exports = React.createClass({
   render: function() {
     return (
       <View style={styles.container}>
-        <Text style={styles.label}>
+        <Text style={styles.step}>
           Step {this.props.step} of 16
         </Text>
         <Text style={styles.label}>
