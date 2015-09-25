@@ -1,0 +1,132 @@
+'use strict';
+
+var React = require('react-native');
+var _ = require('lodash');
+
+var ShowVenue = require('./show_venue');
+
+var {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  ScrollView,
+  TouchableHighlight,
+  Image,
+} = React;
+
+var styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    margin: 20,
+  },
+  label: {
+    marginTop: 80,
+    paddingBottom: 20,
+    fontSize: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+  },
+  venueList: {
+    flex: 1,
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+  },
+  venueItem: {
+    flex: 1,
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+  },
+  venueLogo: {
+    flex: 1,
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+  },
+});
+
+module.exports = React.createClass({
+  getInitialState() {
+    return {
+      query: '',
+      venues: []
+    };
+  },
+  changeQuery(query) {
+    this.setState({ query });
+    this.debouncedGetVenues();
+  },
+  componentWillMount() {
+    this.debouncedGetVenues = _.debounce(this.getVenues, 1000);
+  },
+  getVenues() {
+    this.setState({ loading: true });
+    var data = { query: this.state.query }
+
+    var opts = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    }
+
+    var SERVER_URL = 'http://localhost:3000'
+    fetch(SERVER_URL + '/venues/search', opts).then((resp) => {
+      var venues = JSON.parse(resp._bodyText).venues
+      this.setState({ loading: false, venues: venues });
+    });
+  },
+  openVenue(id, name) {
+    this.props.navigator.push({
+      title: name,
+      component: ShowVenue,
+      passProps: {
+        id: id,
+        step: this.props.step,
+        nextVenue: this.props.nextVenue
+      },
+    });
+  },
+  render: function() {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.label}>
+          Step {this.props.step} of 16
+        </Text>
+        <Text style={styles.label}>
+          What is your favorite Cafe?
+        </Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={this.changeQuery}
+          value={this.state.query}
+        />
+        {this.state.loading ? <Text>Loading...</Text> : <Text></Text> }
+        <ScrollView style={styles.venueList}>
+          {_.map(this.state.venues, (venue) => {
+            return (
+              <TouchableHighlight onPress={(e) => { this.openVenue(venue.id, venue.name) }}>
+                <View key={venue.id} style={styles.venueItem}>
+                  <Image
+                    style={styles.venueLogo}
+                    source={{uri: venue.photo_urls[0]}}
+                  />
+                  <Text>{venue.name}</Text>
+                  <Text>{venue.address}</Text>
+                </View>
+              </TouchableHighlight>
+            );
+          })}
+        </ScrollView>
+      </View>
+    );
+  }
+});
