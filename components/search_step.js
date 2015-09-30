@@ -96,7 +96,6 @@ module.exports = React.createClass({
       passProps: {
         id: id,
         step: this.props.step,
-        nextVenue: this.props.nextVenue
       },
     });
   },
@@ -118,8 +117,8 @@ module.exports = React.createClass({
         <ScrollView style={styles.venueList}>
           {_.map(this.state.venues, (venue) => {
             return (
-              <TouchableHighlight onPress={(e) => { this.openVenue(venue.id, venue.name) }}>
-                <View key={venue.id} style={styles.venueItem}>
+              <TouchableHighlight key={venue.id} onPress={(e) => { this.openVenue(venue.id, venue.name) }}>
+                <View style={styles.venueItem}>
                   <Image
                     style={styles.venueLogo}
                     source={{uri: venue.photo_urls[0]}}

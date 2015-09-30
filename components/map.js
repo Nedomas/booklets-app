@@ -1,5 +1,3 @@
-'use strict';
-
 var React = require('react-native');
 var _ = require('lodash');
 
@@ -33,24 +31,30 @@ module.exports = React.createClass({
 
     fetch(SERVER_URL + '/squares/' + booklet_id + '/all', opts).then((resp) => {
       var squares = JSON.parse(resp._bodyText).squares
-    });
-  },
-  openSearch(step) {
-    this.props.navigator.push({
-      title: 'New Venue',
-      component: SearchStep,
-      passProps: {
-        step: step,
-      },
+      this.setState({ squares: squares });
     });
   },
   addVenue() {
-    const new_step = this.state.squares.length + 1;
-    this.openSearch(new_step);
+    var next_step_number = this.state.squares.length + 1;
+
+    this.props.navigator.push({
+      title: 'Search for a venue',
+      component: SearchStep,
+      passProps: {
+        step: next_step_number,
+      },
+    });
   },
   render: function() {
     return (
-      <View>
+      <View style={{paddingTop: 100 }}>
+        {_.map(this.state.squares, function(square) {
+          return (
+            <Text key={square.id}>
+              {square.photo_url}
+            </Text>
+          );
+        })}
         <TouchableHighlight onPress={this.addVenue}>
           <Text style={{paddingTop: 100 }}>
             Add a venue

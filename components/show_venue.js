@@ -69,11 +69,8 @@ module.exports = React.createClass({
     var booklet_id = 1
 
     fetch(SERVER_URL + '/squares/' + booklet_id + '/add', opts).then((resp) => {
-      this.openSearch();
+      this.props.navigator.popToTop();
     });
-  },
-  openSearch() {
-    this.props.nextVenue();
   },
   getVenue() {
     var opts = {
