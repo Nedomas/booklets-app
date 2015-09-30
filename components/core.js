@@ -21,7 +21,7 @@ module.exports = React.createClass({
         style={styles.container}
         initialRoute={{
           component: Map,
-          title: 'Map',
+          title: 'Your city guide',
         }}
       />
     );
