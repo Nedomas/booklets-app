@@ -13,34 +13,47 @@ var {
 
 module.exports = React.createClass({
   getInitialState() {
+    this.getSquares();
+
     return {
-      step: this.props.step
+      squares: []
     };
   },
+  getSquares() {
+    var opts = {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }
+
+    var SERVER_URL = 'http://localhost:3000'
+    var booklet_id = 1
+
+    fetch(SERVER_URL + '/squares/' + booklet_id + '/all', opts).then((resp) => {
+      var squares = JSON.parse(resp._bodyText).squares
+    });
+  },
   openSearch(step) {
-    this.props.navigator.replace({
+    this.props.navigator.push({
       title: 'New Venue',
       component: SearchStep,
       passProps: {
         step: step,
-        nextVenue: this.nextVenue
       },
     });
   },
-  nextVenue() {
-    var new_step = this.state.step + 1;
-    this.setState({ step: new_step });
+  addVenue() {
+    const new_step = this.state.squares.length + 1;
     this.openSearch(new_step);
-  },
-  exec() {
-    this.openSearch(this.props.step);
   },
   render: function() {
     return (
       <View>
-        <TouchableHighlight onPress={this.exec}>
+        <TouchableHighlight onPress={this.addVenue}>
           <Text style={{paddingTop: 100 }}>
-          Hello
+            Add a venue
           </Text>
         </TouchableHighlight>
       </View>

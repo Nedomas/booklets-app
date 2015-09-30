@@ -1,7 +1,7 @@
 'use strict';
 
 var React = require('react-native');
-var App = require('./app');
+var Map = require('./map');
 
 var {
   NavigatorIOS,
@@ -20,9 +20,8 @@ module.exports = React.createClass({
       <NavigatorIOS
         style={styles.container}
         initialRoute={{
-          component: App,
-          title: 'Login',
-          passProps: { step: 1 },
+          component: Map,
+          title: 'Map',
         }}
       />
     );

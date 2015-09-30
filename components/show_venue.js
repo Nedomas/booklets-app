@@ -68,7 +68,7 @@ module.exports = React.createClass({
     var SERVER_URL = 'http://localhost:3000'
     var booklet_id = 1
 
-    fetch(SERVER_URL + '/booklet/' + booklet_id + '/add_square', opts).then((resp) => {
+    fetch(SERVER_URL + '/squares/' + booklet_id + '/add', opts).then((resp) => {
       this.openSearch();
     });
   },
