@@ -3,6 +3,7 @@
 var React = require('react-native');
 var _ = require('lodash');
 
+var Url = require('./url');
 var ShowVenue = require('./show_venue');
 
 var {
@@ -83,8 +84,7 @@ module.exports = React.createClass({
       body: JSON.stringify(data)
     }
 
-    var SERVER_URL = 'http://localhost:3000'
-    fetch(SERVER_URL + '/venues/search', opts).then((resp) => {
+    fetch(Url.venuesSearch(), opts).then((resp) => {
       var venues = JSON.parse(resp._bodyText).venues
       this.setState({ loading: false, venues: venues });
     });

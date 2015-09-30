@@ -3,6 +3,8 @@
 var React = require('react-native');
 var _ = require('lodash');
 
+var Url = require('./url');
+
 var {
   StyleSheet,
   Text,
@@ -65,10 +67,9 @@ module.exports = React.createClass({
       body: JSON.stringify(data)
     }
 
-    var SERVER_URL = 'http://localhost:3000'
     var booklet_id = 1
 
-    fetch(SERVER_URL + '/squares/' + booklet_id + '/add', opts).then((resp) => {
+    fetch(Url.addSquare(booklet_id), opts).then((resp) => {
       this.props.navigator.popToTop();
     });
   },
@@ -77,8 +78,7 @@ module.exports = React.createClass({
       method: 'GET'
     }
 
-    var SERVER_URL = 'http://localhost:3000'
-    fetch(SERVER_URL + '/venues/' + this.props.id, opts).then((resp) => {
+    fetch(Url.findVenue(this.props.id), opts).then((resp) => {
       var venue = JSON.parse(resp._bodyText).venue
 
       this.setState({

@@ -3,6 +3,7 @@ var _ = require('lodash');
 
 var SearchStep = require('./search_step');
 var Squares = require('./squares');
+var Url = require('./url');
 
 var {
   Image,
@@ -56,10 +57,9 @@ module.exports = React.createClass({
       },
     }
 
-    var SERVER_URL = 'http://localhost:3000'
     var booklet_id = 1
 
-    fetch(SERVER_URL + '/squares/' + booklet_id + '/all', opts).then((resp) => {
+    fetch(Url.allSquares(booklet_id), opts).then((resp) => {
       var squares = JSON.parse(resp._bodyText).squares
       this.setState({ loading: false, squares: squares });
     });
