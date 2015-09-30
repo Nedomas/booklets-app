@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var _ = require('lodash');
+var EventEmitter = require('EventEmitter');
 
 var Url = require('./url');
 var ShowVenue = require('./show_venue');
@@ -55,7 +56,7 @@ var styles = StyleSheet.create({
     backgroundColor: Color.white,
     height: 100,
     marginBottom: 15,
-    flex: 1,
+    borderRadius: 2,
   },
   venuePhoto: {
     height: 100,
@@ -76,6 +77,7 @@ var styles = StyleSheet.create({
     paddingTop: 30,
     height: 100,
     backgroundColor: 'hsla(0, 0%, 0%, .7)',
+    borderRadius: 2,
   },
 });
 
@@ -91,6 +93,7 @@ module.exports = React.createClass({
     this.debouncedGetVenues();
   },
   componentWillMount() {
+    this.event_emitter = new EventEmitter();
     this.debouncedGetVenues = _.debounce(this.getVenues, 1000);
   },
   getVenues() {
@@ -111,13 +114,20 @@ module.exports = React.createClass({
       this.setState({ loading: false, venues: venues });
     });
   },
+  handleRightButtonPress(data) {
+    this.event_emitter.emit('rightButtonPress', {});
+    console.log(this.props);
+  },
   openVenue(id, name) {
     this.props.navigator.push({
       title: name,
       component: ShowVenue,
+      rightButtonTitle: 'Save',
+      onRightButtonPress: this.handleRightButtonPress,
       passProps: {
         id: id,
         step: this.props.step,
+        events: this.event_emitter,
       },
     });
   },
