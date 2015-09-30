@@ -2,6 +2,7 @@ var React = require('react-native');
 var _ = require('lodash');
 
 var SearchStep = require('./search_step');
+var Color = require('./color');
 
 var {
   Image,
@@ -10,12 +11,6 @@ var {
   View,
   TouchableHighlight,
 } = React;
-
-var dark_gray = '#B4BCCC';
-var white = '#fff';
-var red = '#FF3266';
-var black = '#474F6E';
-var light_blue = '#E5EAF4';
 
 var styles = StyleSheet.create({
   squaresContainer: {
@@ -29,8 +24,8 @@ var styles = StyleSheet.create({
     width: 70,
     height: 90,
     marginTop: 10,
-    backgroundColor: white,
-    borderColor: light_blue,
+    backgroundColor: Color.white,
+    borderColor: Color.light_blue,
     borderWidth: 1,
   },
   squarePhoto: {
@@ -39,19 +34,19 @@ var styles = StyleSheet.create({
   squareTitle: {
     paddingTop: 10,
     fontSize: 10,
-    color: black,
+    color: Color.black,
   },
   addVenuePlus: {
     textAlign: 'center',
     height: 30,
     fontSize: 25,
-    color: dark_gray,
+    color: Color.dark_gray,
   },
   addVenueText: {
     paddingTop: 5,
     fontSize: 10,
     textAlign: 'center',
-    color: black,
+    color: Color.black,
   },
 });
 

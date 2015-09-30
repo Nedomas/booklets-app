@@ -4,6 +4,7 @@ var _ = require('lodash');
 var SearchStep = require('./search_step');
 var Squares = require('./squares');
 var Url = require('./url');
+var Color = require('./color');
 
 var {
   Image,
@@ -13,16 +14,11 @@ var {
   TouchableHighlight,
 } = React;
 
-var gray = '#F9F9FB';
-var dark_gray = '#B4BCCC';
-var white = '#fff';
-var red = '#FF3266';
-
 var styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 100,
-    backgroundColor: gray,
+    backgroundColor: Color.gray,
     paddingLeft: 40,
     paddingRight: 40,
   },

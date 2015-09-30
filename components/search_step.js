@@ -5,8 +5,10 @@ var _ = require('lodash');
 
 var Url = require('./url');
 var ShowVenue = require('./show_venue');
+var Color = require('./color');
 
 var {
+  ActivityIndicatorIOS,
   StyleSheet,
   Text,
   TextInput,
@@ -19,41 +21,61 @@ var {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 20,
-    marginTop: 80,
+    paddingTop: 75,
+    backgroundColor: Color.gray,
+    paddingLeft: 40,
+    paddingRight: 40,
   },
-  label: {
-    paddingBottom: 20,
-    fontSize: 20,
-  },
-  step: {
-    paddingBottom: 20,
-    fontSize: 12,
+  progress: {
+    paddingBottom: 16,
+    fontSize: 11,
     textAlign: 'center',
   },
-  input: {
+  question: {
+    paddingBottom: 10,
+    fontSize: 14,
+  },
+  answer: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: Color.light_blue,
+    backgroundColor: Color.white,
     borderWidth: 1,
+    borderRadius: 4,
     padding: 10,
+  },
+  loader: {
+    marginTop: 150,
+    marginLeft: 100,
   },
   venueList: {
-    flex: 1,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10,
+    marginTop: 15,
+    paddingTop: 0,
   },
   venueItem: {
+    backgroundColor: Color.white,
+    height: 100,
+    marginBottom: 15,
     flex: 1,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10,
   },
-  venueLogo: {
-    flex: 1,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10,
+  venuePhoto: {
+    height: 100,
+  },
+  venueName: {
+    textAlign: 'center',
+    color: Color.white,
+    paddingBottom: 5,
+    fontSize: 16,
+  },
+  venueAddress: {
+    textAlign: 'center',
+    color: Color.white,
+    fontSize: 12,
+  },
+  insideVenuePhoto: {
+    padding: 20,
+    paddingTop: 30,
+    height: 100,
+    backgroundColor: 'hsla(0, 0%, 0%, .7)',
   },
 });
 
@@ -100,37 +122,49 @@ module.exports = React.createClass({
     });
   },
   render: function() {
+    if (this.state.loading) {
+      var bottom_part = <ActivityIndicatorIOS style={styles.loader} animating={true} size='large' color={Color.dark_gray} />
+    } else {
+      var bottom_part = <View style={styles.venueList}>
+        {_.map(this.state.venues, (venue) => {
+          return (
+            <TouchableHighlight key={venue.id} onPress={(e) => { this.openVenue(venue.id, venue.name) }}>
+              <View style={styles.venueItem}>
+                <Image
+                  style={styles.venuePhoto}
+                  source={{uri: venue.photo_urls[0]}}
+                >
+                  <View style={styles.insideVenuePhoto}>
+                    <Text style={styles.venueName}>
+                      {venue.name}
+                    </Text>
+                    <Text style={styles.venueAddress}>
+                      {venue.address}
+                    </Text>
+                  </View>
+                </Image>
+              </View>
+            </TouchableHighlight>
+          );
+        })}
+      </View>
+    }
+
     return (
-      <View style={styles.container}>
-        <Text style={styles.step}>
-          Step {this.props.step} of 16
+      <ScrollView style={styles.container} automaticallyAdjustContentInsets={false}>
+        <Text style={styles.progress}>
+          STEP {this.props.step} OF 16
         </Text>
-        <Text style={styles.label}>
+        <Text style={styles.question}>
           What is your favorite Cafe?
         </Text>
         <TextInput
-          style={styles.input}
+          style={styles.answer}
           onChangeText={this.changeQuery}
           value={this.state.query}
         />
-        {this.state.loading ? <Text>Loading...</Text> : <Text></Text> }
-        <ScrollView style={styles.venueList}>
-          {_.map(this.state.venues, (venue) => {
-            return (
-              <TouchableHighlight key={venue.id} onPress={(e) => { this.openVenue(venue.id, venue.name) }}>
-                <View style={styles.venueItem}>
-                  <Image
-                    style={styles.venueLogo}
-                    source={{uri: venue.photo_urls[0]}}
-                  />
-                  <Text>{venue.name}</Text>
-                  <Text>{venue.address}</Text>
-                </View>
-              </TouchableHighlight>
-            );
-          })}
-        </ScrollView>
-      </View>
+        {bottom_part}
+      </ScrollView>
     );
   }
 });
