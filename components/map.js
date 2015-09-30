@@ -12,7 +12,7 @@ var {
   TouchableHighlight,
 } = React;
 
-var gray = '#F7F7F8';
+var gray = '#F9F9FB';
 var dark_gray = '#B4BCCC';
 var white = '#fff';
 var red = '#FF3266';

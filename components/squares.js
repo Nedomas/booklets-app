@@ -14,6 +14,8 @@ var {
 var dark_gray = '#B4BCCC';
 var white = '#fff';
 var red = '#FF3266';
+var black = '#474F6E';
+var light_blue = '#E5EAF4';
 
 var styles = StyleSheet.create({
   squaresContainer: {
@@ -28,9 +30,16 @@ var styles = StyleSheet.create({
     height: 90,
     marginTop: 10,
     backgroundColor: white,
+    borderColor: light_blue,
+    borderWidth: 1,
   },
   squarePhoto: {
     height: 30,
+  },
+  squareTitle: {
+    paddingTop: 10,
+    fontSize: 10,
+    color: black,
   },
   addVenuePlus: {
     textAlign: 'center',
@@ -39,8 +48,10 @@ var styles = StyleSheet.create({
     color: dark_gray,
   },
   addVenueText: {
+    paddingTop: 5,
     fontSize: 10,
     textAlign: 'center',
+    color: black,
   },
 });
 
@@ -57,8 +68,8 @@ module.exports = React.createClass({
                   source={{uri: square.photo_url}}
                 />
 
-                <Text>
-                  {square.order}
+                <Text style={styles.squareTitle}>
+                  {square.title}
                 </Text>
               </View>
             );
