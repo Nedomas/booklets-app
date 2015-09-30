@@ -31,14 +31,13 @@ module.exports = React.createClass({
 
     return {
       loading: true,
-      squares: []
+      squares: [],
     };
   },
   setupReloads() {
     this.props.navigator.navigationContext.addListener('didfocus', this.reloadSquares);
   },
   reloadSquares() {
-    console.log(this.state.loading);
     if (this.state.loading) return;
 
     this.setState({ loading: true });

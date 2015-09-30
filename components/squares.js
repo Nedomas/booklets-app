@@ -17,10 +17,11 @@ var styles = StyleSheet.create({
     flex: 1,
     flexDirection:'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   square: {
     padding: 5,
+    margin: 5,
     width: 70,
     height: 90,
     marginTop: 10,
@@ -31,7 +32,7 @@ var styles = StyleSheet.create({
   squarePhoto: {
     height: 30,
   },
-  squareTitle: {
+  squareName: {
     paddingTop: 10,
     fontSize: 10,
     color: Color.black,
@@ -63,8 +64,8 @@ module.exports = React.createClass({
                   source={{uri: square.photo_url}}
                 />
 
-                <Text style={styles.squareTitle}>
-                  {square.title}
+                <Text style={styles.squareName}>
+                  {square.name}
                 </Text>
               </View>
             );

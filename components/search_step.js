@@ -116,7 +116,6 @@ module.exports = React.createClass({
   },
   handleRightButtonPress(data) {
     this.event_emitter.emit('rightButtonPress', {});
-    console.log(this.props);
   },
   openVenue(id, name) {
     this.props.navigator.push({
@@ -130,6 +129,18 @@ module.exports = React.createClass({
         events: this.event_emitter,
       },
     });
+  },
+  question() {
+    var questions = [
+      'What is your favorite Cafe?',
+      'What is your favorite breakfast place?',
+      'What is your favorite bar?',
+    ];
+
+    var question_no = this.props.step;
+    if (question_no > questions.length) question_no = questions.length;
+
+    return questions[question_no - 1];
   },
   render: function() {
     if (this.state.loading) {
@@ -166,7 +177,7 @@ module.exports = React.createClass({
           STEP {this.props.step} OF 16
         </Text>
         <Text style={styles.question}>
-          What is your favorite Cafe?
+          {this.question()}
         </Text>
         <TextInput
           style={styles.answer}
