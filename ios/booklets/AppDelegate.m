@@ -31,8 +31,9 @@
    * on the same Wi-Fi network.
    */
 
-  jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
-
+  //jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
+  jsCodeLocation = [NSURL URLWithString:@"https://booklets.herokuapp.com/app.jsbundle"];
+  
   /**
    * OPTION 2
    * Load from pre-bundled file on disk. To re-generate the static bundle
