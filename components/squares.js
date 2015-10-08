@@ -56,18 +56,20 @@ module.exports = React.createClass({
     return (
       <View style={styles.container}>
         <View style={styles.squaresContainer}>
-          {_.map(this.props.squares, function(square) {
+          {_.map(this.props.squares, (square) => {
             return (
-              <View style={styles.square} key={square.id}>
-                <Image
-                  style={styles.squarePhoto}
-                  source={{uri: square.photo_url}}
-                />
+              <TouchableHighlight style={styles.square} key={square.id} onPress={(e) => this.props.editPress(square.id)}>
+                <View>
+                  <Image
+                    style={styles.squarePhoto}
+                    source={{uri: square.photo_url}}
+                  />
 
-                <Text style={styles.squareName}>
-                  {square.name}
-                </Text>
-              </View>
+                  <Text style={styles.squareName}>
+                    {square.name}
+                  </Text>
+                </View>
+              </TouchableHighlight>
             );
           })}
           <TouchableHighlight style={styles.square} onPress={this.props.addVenue}>

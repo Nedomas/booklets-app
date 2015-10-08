@@ -114,7 +114,7 @@ module.exports = React.createClass({
       method: 'GET'
     }
 
-    fetch(Url.findVenue(this.props.id), opts).then((resp) => {
+    fetch(Url.findVenue(this.props.id, this.props.type), opts).then((resp) => {
       var venue = JSON.parse(resp._bodyText).venue
 
       this.setState({

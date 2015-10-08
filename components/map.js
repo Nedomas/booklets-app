@@ -1,10 +1,13 @@
 var React = require('react-native');
 var _ = require('lodash');
+var EventEmitter = require('EventEmitter');
 
 var SearchStep = require('./search_step');
 var Squares = require('./squares');
 var Url = require('./url');
 var Color = require('./color');
+
+var ShowVenue = require('./show_venue');
 
 var {
   Image,
@@ -60,13 +63,34 @@ module.exports = React.createClass({
     });
   },
   addVenue() {
-    var next_step_number = this.state.squares.length + 1;
-
     this.props.navigator.push({
       title: 'Search for a venue',
       component: SearchStep,
       passProps: {
-        step: next_step_number,
+        step: this.nextStepNumber(),
+      },
+    });
+  },
+  nextStepNumber() {
+    return this.state.squares.length + 1;
+  },
+  componentWillMount() {
+    this.event_emitter = new EventEmitter();
+  },
+  handleRightButtonPress(data) {
+    this.event_emitter.emit('rightButtonPress', {});
+  },
+  handleEditPress(venue_id) {
+    this.props.navigator.push({
+      title: name,
+      component: ShowVenue,
+      rightButtonTitle: 'Save',
+      onRightButtonPress: this.handleRightButtonPress,
+      passProps: {
+        id: venue_id,
+        type: 'local',
+        step: this.nextStepNumber(),
+        events: this.event_emitter,
       },
     });
   },
@@ -74,7 +98,7 @@ module.exports = React.createClass({
     if (this.state.loading) {
       var loader_or_squares = <Text>Loading</Text>
     } else {
-      var loader_or_squares = <Squares squares={this.state.squares} addVenue={this.addVenue} />
+      var loader_or_squares = <Squares squares={this.state.squares} addVenue={this.addVenue} editPress={this.handleEditPress}/>
     }
 
     return (
