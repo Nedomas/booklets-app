@@ -5,7 +5,7 @@ var _ = require('lodash');
 var EventEmitter = require('EventEmitter');
 
 var Url = require('./url');
-var ShowVenue = require('./show_venue');
+var ShowSquare = require('./show_square');
 var Color = require('./color');
 
 var {
@@ -117,14 +117,14 @@ module.exports = React.createClass({
   handleRightButtonPress(data) {
     this.event_emitter.emit('rightButtonPress', {});
   },
-  openVenue(id, name) {
+  openVenue(venue_id, name) {
     this.props.navigator.push({
       title: name,
-      component: ShowVenue,
+      component: ShowSquare,
       rightButtonTitle: 'Save',
       onRightButtonPress: this.handleRightButtonPress,
       passProps: {
-        id: id,
+        venue_id: venue_id,
         step: this.props.step,
         events: this.event_emitter,
       },

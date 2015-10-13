@@ -7,7 +7,7 @@ var Squares = require('./squares');
 var Url = require('./url');
 var Color = require('./color');
 
-var ShowVenue = require('./show_venue');
+var ShowSquare = require('./show_square');
 
 var {
   Image,
@@ -71,6 +71,21 @@ module.exports = React.createClass({
       },
     });
   },
+  print() {
+    var opts = {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }
+
+    var booklet_id = 1
+
+    fetch(Url.print(booklet_id), opts).then((resp) => {
+      alert('done');
+    });
+  },
   nextStepNumber() {
     return this.state.squares.length + 1;
   },
@@ -80,14 +95,14 @@ module.exports = React.createClass({
   handleRightButtonPress(data) {
     this.event_emitter.emit('rightButtonPress', {});
   },
-  handleEditPress(venue_id) {
+  handleEditPress(square_id) {
     this.props.navigator.push({
       title: name,
-      component: ShowVenue,
+      component: ShowSquare,
       rightButtonTitle: 'Save',
       onRightButtonPress: this.handleRightButtonPress,
       passProps: {
-        id: venue_id,
+        square_id: square_id,
         type: 'local',
         step: this.nextStepNumber(),
         events: this.event_emitter,
@@ -98,7 +113,12 @@ module.exports = React.createClass({
     if (this.state.loading) {
       var loader_or_squares = <Text>Loading</Text>
     } else {
-      var loader_or_squares = <Squares squares={this.state.squares} addVenue={this.addVenue} editPress={this.handleEditPress}/>
+      var loader_or_squares = <Squares
+        squares={this.state.squares}
+        addVenue={this.addVenue}
+        print={this.print}
+        editPress={this.handleEditPress}
+      />
     }
 
     return (

@@ -74,10 +74,10 @@ var styles = StyleSheet.create({
 module.exports = React.createClass({
   mixins: [Subscribable.Mixin],
   getInitialState() {
-    this.getVenue();
+    this.load();
 
     return {
-      current_photo_url: '',
+      photo_url: '',
       description: '',
     };
   },
@@ -109,22 +109,30 @@ module.exports = React.createClass({
       this.props.navigator.popToTop();
     });
   },
-  getVenue() {
+  dataUrl() {
+    if (this.props.square_id) {
+      return Url.findSquare(this.props.square_id);
+    } else {
+      var booklet_id = 1;
+      return Url.newSquare(booklet_id, this.props.venue_id);
+    }
+  },
+  load() {
     var opts = {
       method: 'GET'
     }
 
-    fetch(Url.findVenue(this.props.id, this.props.type), opts).then((resp) => {
-      var venue = JSON.parse(resp._bodyText).venue
+    fetch(this.dataUrl(), opts).then((resp) => {
+      console.log(resp);
+      var square = JSON.parse(resp._bodyText).square
 
       this.setState({
-        name: venue.name,
-        address: venue.address,
-        phone: venue.phone,
-        photo_urls: venue.photo_urls,
-        website: venue.website,
-        accepts_credit_card: venue.accepts_credit_card,
-        current_photo_url: venue.photo_urls[0],
+        name: square.name,
+        address: square.address,
+        phone: square.phone,
+        photo_url: square.photo_url,
+        photo_urls: square.photo_urls,
+        website: square.website,
       });
     });
   },
@@ -134,7 +142,7 @@ module.exports = React.createClass({
         <View style={styles.venueCard}>
           <Image
             style={styles.venuePhoto}
-            source={{uri: this.state.current_photo_url}}
+            source={{uri: this.state.photo_url}}
           />
 
           <View style={styles.venueInfo}>

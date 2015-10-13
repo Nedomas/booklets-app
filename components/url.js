@@ -17,15 +17,15 @@ module.exports = class Url {
     return `${this.serverUrl()}/venues/search`;
   }
 
-  static findVenue(venue_id, type) {
-    return type == 'local' ? this.findLocalVenue(venue_id) : this.findExternalVenue(venue_id);
+  static findSquare(square_id) {
+    return `${this.serverUrl()}/squares/find/${square_id}`;
   }
 
-  static findLocalVenue(venue_id) {
-    return `${this.serverUrl()}/venues/${venue_id}/local`;
+  static newSquare(booklet_id, venue_id) {
+return `${this.serverUrl()}/squares/${booklet_id}/new/${venue_id}`;
   }
 
-  static findExternalVenue(venue_id) {
-    return `${this.serverUrl()}/venues/${venue_id}`;
+  static print(booklet_id) {
+    return `${this.serverUrl()}/booklets/${booklet_id}/print`;
   }
 }

@@ -82,6 +82,14 @@ module.exports = React.createClass({
               </Text>
             </View>
           </TouchableHighlight>
+
+          <TouchableHighlight onPress={this.props.print}>
+            <View>
+              <Text style={styles.addVenuePlus}>
+                Print my map
+              </Text>
+            </View>
+          </TouchableHighlight>
         </View>
       </View>
     );
