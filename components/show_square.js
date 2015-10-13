@@ -6,6 +6,7 @@ var Subscribable = require('Subscribable');
 
 var Url = require('./url');
 var Color = require('./color');
+var SquareInfoBox = require('./square_info_box');
 
 var {
   StyleSheet,
@@ -79,6 +80,7 @@ module.exports = React.createClass({
     return {
       photo_url: '',
       description: '',
+      editing: false,
     };
   },
   componentDidMount() {
@@ -147,9 +149,19 @@ module.exports = React.createClass({
       });
     });
   },
+  change: function(type) {
+    return (value) => {
+      var new_state = this.state;
+      new_state[type] = value;
+      this.setState(new_state);
+    };
+  },
+  startEditing: function() {
+    this.setState({ editing: true });
+  },
   render: function() {
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <View style={styles.venueCard}>
           <Image
             style={styles.venuePhoto}
@@ -160,30 +172,29 @@ module.exports = React.createClass({
             <Text style={styles.venueName}>
               {this.state.name}
             </Text>
-            <View style={styles.venueInfoBox}>
-              <Text style={styles.venueInfoLabel}>
-                ADDRESS
+            <TouchableHighlight style={styles.edit} onPress={(e) => this.startEditing()}>
+              <Text style={styles.venueName}>
+                Edit
               </Text>
-              <Text style={styles.venueInfoValue}>
-                {this.state.address}
-              </Text>
-            </View>
-            <View style={styles.venueInfoBox}>
-              <Text style={styles.venueInfoLabel}>
-                PHONE
-              </Text>
-              <Text style={styles.venueInfoValue}>
-                {this.state.phone}
-              </Text>
-            </View>
-            <View>
-              <Text style={styles.venueInfoLabel}>
-                WEBSITE
-              </Text>
-              <Text style={styles.venueInfoValue}>
-                {this.state.website}
-              </Text>
-            </View>
+            </TouchableHighlight>
+            <SquareInfoBox
+              label='ADDRESS'
+              value={this.state.address}
+              onChange={this.change('address')}
+              editing={this.state.editing}
+            />
+            <SquareInfoBox
+              label='PHONE'
+              value={this.state.phone}
+              onChange={this.change('phone')}
+              editing={this.state.editing}
+            />
+            <SquareInfoBox
+              label='WEBSITE'
+              value={this.state.website}
+              onChange={this.change('website')}
+              editing={this.state.editing}
+            />
           </View>
 
           <TextInput
@@ -195,7 +206,7 @@ module.exports = React.createClass({
           />
 
         </View>
-      </View>
+      </ScrollView>
     );
   }
 });
