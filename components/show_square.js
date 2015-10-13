@@ -87,27 +87,38 @@ module.exports = React.createClass({
   changeDescription(description) {
     this.setState({ description });
   },
+  saveUrl() {
+    var booklet_id = 1;
+
+    if (this.props.square_id) {
+      return Url.updateSquare(booklet_id, this.props.square_id);
+    } else {
+      return Url.createSquare(booklet_id, this.props.venue_id);
+    }
+  },
   save() {
-    var data = {
-      venue_id: this.props.id,
+    this.execSave().then((resp) => {
+      this.props.navigator.popToTop();
+    });
+  },
+  saveData() {
+    return {
+      venue_id: this.props.venue_id,
       order: this.props.step,
       description: this.state.description,
-    }
-
+    };
+  },
+  execSave() {
     var opts = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(this.saveData())
     }
 
-    var booklet_id = 1
-
-    fetch(Url.addSquare(booklet_id), opts).then((resp) => {
-      this.props.navigator.popToTop();
-    });
+    return fetch(this.saveUrl(), opts);
   },
   dataUrl() {
     if (this.props.square_id) {
@@ -123,7 +134,6 @@ module.exports = React.createClass({
     }
 
     fetch(this.dataUrl(), opts).then((resp) => {
-      console.log(resp);
       var square = JSON.parse(resp._bodyText).square
 
       this.setState({
@@ -133,6 +143,7 @@ module.exports = React.createClass({
         photo_url: square.photo_url,
         photo_urls: square.photo_urls,
         website: square.website,
+        description: square.description,
       });
     });
   },

@@ -58,7 +58,7 @@ module.exports = React.createClass({
         <View style={styles.squaresContainer}>
           {_.map(this.props.squares, (square) => {
             return (
-              <TouchableHighlight style={styles.square} key={square.id} onPress={(e) => this.props.editPress(square.id)}>
+              <TouchableHighlight style={styles.square} key={square.id} onPress={(e) => this.props.editPress(square.id, square.order)}>
                 <View>
                   <Image
                     style={styles.squarePhoto}

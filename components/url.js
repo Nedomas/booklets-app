@@ -9,10 +9,6 @@ module.exports = class Url {
     return `${this.serverUrl()}/squares/${booklet_id}/all`;
   }
 
-  static addSquare(booklet_id) {
-    return `${this.serverUrl()}/squares/${booklet_id}/add`;
-  }
-
   static venuesSearch() {
     return `${this.serverUrl()}/venues/search`;
   }
@@ -22,7 +18,15 @@ module.exports = class Url {
   }
 
   static newSquare(booklet_id, venue_id) {
-return `${this.serverUrl()}/squares/${booklet_id}/new/${venue_id}`;
+    return `${this.serverUrl()}/squares/${booklet_id}/new/${venue_id}`;
+  }
+
+  static createSquare(booklet_id, venue_id) {
+    return `${this.serverUrl()}/squares/${booklet_id}/create/${venue_id}`;
+  }
+
+  static updateSquare(booklet_id, square_id) {
+    return `${this.serverUrl()}/squares/${booklet_id}/update/${square_id}`;
   }
 
   static print(booklet_id) {

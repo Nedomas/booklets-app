@@ -95,7 +95,7 @@ module.exports = React.createClass({
   handleRightButtonPress(data) {
     this.event_emitter.emit('rightButtonPress', {});
   },
-  handleEditPress(square_id) {
+  handleEditPress(square_id, step) {
     this.props.navigator.push({
       title: name,
       component: ShowSquare,
@@ -104,7 +104,7 @@ module.exports = React.createClass({
       passProps: {
         square_id: square_id,
         type: 'local',
-        step: this.nextStepNumber(),
+        step: step,
         events: this.event_emitter,
       },
     });
