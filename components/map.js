@@ -109,6 +109,21 @@ module.exports = React.createClass({
       },
     });
   },
+  destroySquare(square_id) {
+    var opts = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }
+
+    fetch(Url.destroySquare(square_id), opts).then((resp) => {
+      var squares = JSON.parse(resp._bodyText).squares
+
+      this.setState({ squares: squares });
+    });
+  },
   render: function() {
     if (this.state.loading) {
       var loader_or_squares = <Text>Loading</Text>
@@ -118,6 +133,7 @@ module.exports = React.createClass({
         addVenue={this.addVenue}
         print={this.print}
         editPress={this.handleEditPress}
+        destroySquare={this.destroySquare}
       />
     }
 

@@ -29,6 +29,10 @@ module.exports = class Url {
     return `${this.serverUrl()}/squares/${booklet_id}/update/${square_id}`;
   }
 
+  static destroySquare(square_id) {
+    return `${this.serverUrl()}/squares/1/destroy/${square_id}`;
+  }
+
   static print(booklet_id) {
     return `${this.serverUrl()}/booklets/${booklet_id}/print`;
   }

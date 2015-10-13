@@ -59,7 +59,6 @@ module.exports = React.createClass({
     };
   },
   handleLongPress: function(square) {
-    console.log('set to', square.id);
     this.setState({ editing_id: square.id });
   },
   render: function() {
@@ -73,6 +72,7 @@ module.exports = React.createClass({
                 onPress={(e) => this.props.onPress(square.id, square.order)}
                 onLongPress={(e) => this.handleLongPress(square)}
                 editing={square.id == this.state.editing_id}
+                onDestroy={this.props.destroySquare}
                 {...square}
               />
             );

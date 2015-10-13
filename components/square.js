@@ -3,6 +3,7 @@ var _ = require('lodash');
 
 var SearchStep = require('./search_step');
 var Color = require('./color');
+var DestroyButton = require('./destroy_button');
 
 var {
   Image,
@@ -34,10 +35,8 @@ var styles = StyleSheet.create({
 });
 
 module.exports = React.createClass({
-  deletePrompt: function() {
-    if (!this.props.editing) return;
-
-    return <Text>Editing</Text>;
+  destroy: function() {
+    this.props.onDestroy(this.props.id);
   },
   render: function() {
     console.log(this.props);
@@ -57,7 +56,10 @@ module.exports = React.createClass({
             {this.props.name}
           </Text>
 
-          {this.deletePrompt()}
+          <DestroyButton
+            show={this.props.editing}
+            onPress={(e) => this.destroy()}
+          />
         </View>
       </TouchableHighlight>
     );
