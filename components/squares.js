@@ -3,6 +3,7 @@ var _ = require('lodash');
 
 var SearchStep = require('./search_step');
 var Color = require('./color');
+var Square = require('./square');
 
 var {
   Image,
@@ -52,24 +53,28 @@ var styles = StyleSheet.create({
 });
 
 module.exports = React.createClass({
+  getInitialState: function() {
+    return {
+      editing_id: 0,
+    };
+  },
+  handleLongPress: function(square) {
+    console.log('set to', square.id);
+    this.setState({ editing_id: square.id });
+  },
   render: function() {
     return (
       <View style={styles.container}>
         <View style={styles.squaresContainer}>
           {_.map(this.props.squares, (square) => {
             return (
-              <TouchableHighlight style={styles.square} key={square.id} onPress={(e) => this.props.editPress(square.id, square.order)}>
-                <View>
-                  <Image
-                    style={styles.squarePhoto}
-                    source={{uri: square.photo_url}}
-                  />
-
-                  <Text style={styles.squareName}>
-                    {square.name}
-                  </Text>
-                </View>
-              </TouchableHighlight>
+              <Square
+                key={square.id}
+                onPress={(e) => this.props.onPress(square.id, square.order)}
+                onLongPress={(e) => this.handleLongPress(square)}
+                editing={square.id == this.state.editing_id}
+                {...square}
+              />
             );
           })}
           <TouchableHighlight style={styles.square} onPress={this.props.addVenue}>
