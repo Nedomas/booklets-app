@@ -184,6 +184,7 @@ module.exports = React.createClass({
           style={styles.answer}
           onChangeText={this.changeQuery}
           value={this.state.query}
+          autoFocus
         />
         {bottom_part}
       </ScrollView>

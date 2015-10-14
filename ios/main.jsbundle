@@ -53664,14 +53664,15 @@ this.saveBookletId(booklet_id));case 7:return context$1$0.abrupt('return',
 booklet_id);case 8:case 'end':return context$1$0.stop();}},null,this);},
 
 ensureBooklet:function callee$0$0(){var 
-id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(AsyncStorage.getItem(BOOKLET_STORAGE_KEY));case 2:id = context$1$0.sent;
-Url.booklet_id = id?id:this.createBooklet();case 4:case 'end':return context$1$0.stop();}},null,this);},
+id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(AsyncStorage.getItem(BOOKLET_STORAGE_KEY));case 2:id = context$1$0.sent;if(!
+id){context$1$0.next = 5;break;}return context$1$0.abrupt('return',Url.booklet_id = id);case 5:context$1$0.next = 7;return regeneratorRuntime.awrap(
+
+this.createBooklet());case 7:Url.booklet_id = context$1$0.sent;case 8:case 'end':return context$1$0.stop();}},null,this);},
 
 saveBookletId:function callee$0$0(booklet_id){return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:return context$1$0.abrupt('return',
 AsyncStorage.setItem(BOOKLET_STORAGE_KEY,String(booklet_id)));case 1:case 'end':return context$1$0.stop();}},null,this);},
 
 getSquares:function callee$0$0(){var 
-
 
 
 opts,
@@ -53682,11 +53683,11 @@ opts,
 
 
 
-booklet_id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){var _this=this;while(1) switch(context$1$0.prev = context$1$0.next){case 0:alert('hey');context$1$0.next = 3;return regeneratorRuntime.awrap(this.ensureBooklet());case 3:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};booklet_id = 1;
+booklet_id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){var _this=this;while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(this.ensureBooklet());case 2:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};booklet_id = 1;
 
 fetch(Url.allSquares(),opts).then(function(resp){
 var squares=JSON.parse(resp._bodyText).squares;
-_this.setState({loading:false,squares:squares});});case 6:case 'end':return context$1$0.stop();}},null,this);},
+_this.setState({loading:false,squares:squares});});case 5:case 'end':return context$1$0.stop();}},null,this);},
 
 
 findSquare:function(square_id){
@@ -53720,7 +53721,7 @@ handleEditPress:function(square_id){
 const square=this.findSquare(square_id);
 
 this.props.navigator.push({
-title:name,
+title:square.name,
 component:ShowSquare,
 rightButtonTitle:'Save',
 onRightButtonPress:this.handleRightButtonPress,
@@ -66302,7 +66303,8 @@ this.question()),
 React.createElement(TextInput,{
 style:styles.answer,
 onChangeText:this.changeQuery,
-value:this.state.query}),
+value:this.state.query,
+autoFocus:true}),
 
 bottom_part));}});
 });
@@ -66315,8 +66317,8 @@ React.AsyncStorage;
 module.exports = (function(){function Url(){_classCallCheck(this,Url);}_createClass(Url,null,[{key:'serverUrl',value:
 function serverUrl(){
 
-return 'http://localhost:3000';}},{key:'createBooklet',value:
 
+return 'http://7da9610b.ngrok.com';}},{key:'createBooklet',value:
 
 
 function createBooklet(){
@@ -66384,7 +66386,8 @@ venuePhoto:{
 height:150},
 
 venueCard:{
-backgroundColor:Color.white},
+backgroundColor:Color.white,
+paddingBottom:200},
 
 venueInfo:{
 padding:20,
@@ -66446,7 +66449,11 @@ saveData:function(){
 return {
 venue_id:this.props.venue_id,
 order:this.props.step,
-description:this.state.description};},
+description:this.state.description,
+name:this.state.name,
+address:this.state.address,
+phone:this.state.phone,
+website:this.state.website};},
 
 
 execSave:function(){
@@ -66491,20 +66498,37 @@ _this3.setState(new_state);};},
 startEditing:function(){
 this.setState({editing:true});},
 
-render:function(){var _this4=this;
+image:function(){
+if(!this.state.photo_url)return false;
+
 return (
-React.createElement(ScrollView,{style:styles.container},
-React.createElement(View,{style:styles.venueCard},
 React.createElement(Image,{
 style:styles.venuePhoto,
-source:{uri:this.state.photo_url}}),
+source:{uri:this.state.photo_url}}));},
 
+
+
+handleFocus:function(type){var _this4=this;
+setTimeout(function(e){
+var scrollResponder=_this4.refs.scrollView.getScrollResponder();
+scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
+React.findNodeHandle(_this4.refs[type]),
+110,
+true);},
+
+50);},
+
+render:function(){var _this5=this;
+return (
+React.createElement(ScrollView,{style:styles.container,ref:'scrollView',keyboardDismissMode:'on-drag',keyboardShouldPersistTaps:false},
+React.createElement(View,{style:styles.venueCard},
+this.image(),
 
 React.createElement(View,{style:styles.venueInfo},
 React.createElement(Text,{style:styles.venueName},
 this.state.name),
 
-React.createElement(TouchableHighlight,{style:styles.edit,onPress:function(e){return _this4.startEditing();}},
+React.createElement(TouchableHighlight,{style:styles.edit,onPress:function(e){return _this5.startEditing();}},
 React.createElement(Text,{style:styles.venueName},'Edit')),
 
 
@@ -66534,7 +66558,8 @@ style:styles.description,
 placeholder:'Tips and tricks for your guests here.',
 onChangeText:this.changeDescription,
 value:this.state.description,
-multiline:true}))));}});
+ref:'description',
+onFocus:this.handleFocus('description')}))));}});
 });
 __d('booklets/components/color.js',[],function(global, require, module, exports) {  module.exports = {
 gray:'#F9F9FB',
@@ -66584,16 +66609,13 @@ fontSize:14}});
 
 
 module.exports = React.createClass({displayName:'exports',
-onChange:function(e){
-this.props.onChange(e.target.value);},
-
 editingBox:function(){
 return (
 React.createElement(View,{style:styles.box},
 React.createElement(TextInput,{
 style:styles.description,
 placeholder:this.props.label,
-onChangeText:this.onChange,
+onChangeText:this.props.onChange,
 value:this.props.value})));},
 
 
@@ -66771,15 +66793,22 @@ Image=
 React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.View;var TouchableHighlight=React.TouchableHighlight;
 
 var styles=StyleSheet.create({
-square:{
+bubble:{
+position:'absolute',
+top:0,
+left:40,
+height:40,
+width:40,
+backgroundColor:Color.black,
+borderColor:Color.white,
+borderWidth:2,
 padding:5,
-margin:5,
-width:70,
-height:90,
-marginTop:10,
-backgroundColor:Color.white,
-borderColor:Color.light_blue,
-borderWidth:1}});
+borderRadius:999},
+
+symbol:{
+textAlign:'center',
+color:Color.white,
+marginTop:5}});
 
 
 
@@ -66788,8 +66817,8 @@ render:function(){
 if(!this.props.show)return React.createElement(View,null);
 
 return (
-React.createElement(TouchableHighlight,{style:styles.square,onPress:this.props.onPress},
-React.createElement(Text,null,'X')));}});
+React.createElement(TouchableHighlight,{style:styles.bubble,onPress:this.props.onPress},
+React.createElement(Text,{style:styles.symbol},'X')));}});
 });
 __d('booklets/components/filled_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/destroy_button.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -66839,6 +66868,7 @@ console.log('press out');},
 
 render:function(){var _this=this;
 return (
+React.createElement(View,null,
 React.createElement(TouchableHighlight,{
 style:styles.square,
 onPress:function(e){return _this.props.onPress(_this.props.id);},
@@ -66853,12 +66883,14 @@ source:{uri:this.props.photo_url}}),
 
 
 React.createElement(Text,{style:styles.squareName},
-this.props.name),
+this.props.name))),
+
+
 
 
 React.createElement(DestroyButton,{
 show:this.props.editing,
-onPress:function(e){return _this.destroy();}}))));}});
+onPress:function(e){return _this.destroy();}})));}});
 });
 __d('booklets/components/email.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/square_info_box.js"],function(global, require, module, exports) {  'use strict';
 

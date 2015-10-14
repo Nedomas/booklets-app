@@ -9,6 +9,7 @@
     "lodash": "^3.10.1",
     "react": "^0.13.3",
     "react-native": "^0.12.0",
+    "react-native-keyboardevents": "^0.4.5",
     "request-promise": "^0.4.3"
   }
 }

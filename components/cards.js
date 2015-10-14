@@ -125,7 +125,7 @@ module.exports = React.createClass({
     const square = this.findSquare(square_id);
 
     this.props.navigator.push({
-      title: name,
+      title: square.name,
       component: ShowSquare,
       rightButtonTitle: 'Save',
       onRightButtonPress: this.handleRightButtonPress,

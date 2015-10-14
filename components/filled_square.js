@@ -46,29 +46,31 @@ module.exports = React.createClass({
   },
   render: function() {
     return (
-      <TouchableHighlight
-        style={styles.square}
-        onPress={(e) => this.props.onPress(this.props.id)}
-        onLongPress={this.props.onLongPress}
-        onPressIn={this.pressIn}
-        onPressOut={this.pressOut}
-       >
-        <View>
-          <Image
-            style={styles.squarePhoto}
-            source={{uri: this.props.photo_url}}
-          />
+      <View>
+        <TouchableHighlight
+          style={styles.square}
+          onPress={(e) => this.props.onPress(this.props.id)}
+          onLongPress={this.props.onLongPress}
+          onPressIn={this.pressIn}
+          onPressOut={this.pressOut}
+         >
+          <View>
+            <Image
+              style={styles.squarePhoto}
+              source={{uri: this.props.photo_url}}
+            />
 
-          <Text style={styles.squareName}>
-            {this.props.name}
-          </Text>
+            <Text style={styles.squareName}>
+              {this.props.name}
+            </Text>
+          </View>
+        </TouchableHighlight>
 
-          <DestroyButton
-            show={this.props.editing}
-            onPress={(e) => this.destroy()}
-          />
-        </View>
-      </TouchableHighlight>
+        <DestroyButton
+          show={this.props.editing}
+          onPress={(e) => this.destroy()}
+        />
+      </View>
     );
   }
 });

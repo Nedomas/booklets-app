@@ -37,6 +37,7 @@ var styles = StyleSheet.create({
   },
   venueCard: {
     backgroundColor: Color.white,
+    paddingBottom: 200,
   },
   venueInfo: {
     padding: 20,
@@ -99,6 +100,10 @@ module.exports = React.createClass({
       venue_id: this.props.venue_id,
       order: this.props.step,
       description: this.state.description,
+      name: this.state.name,
+      address: this.state.address,
+      phone: this.state.phone,
+      website: this.state.website,
     };
   },
   execSave() {
@@ -143,14 +148,31 @@ module.exports = React.createClass({
   startEditing: function() {
     this.setState({ editing: true });
   },
+  image() {
+    if (!this.state.photo_url) return false;
+
+    return (
+      <Image
+        style={styles.venuePhoto}
+        source={{uri: this.state.photo_url}}
+      />
+    );
+  },
+  handleFocus(type) {
+    setTimeout((e) => {
+      let scrollResponder = this.refs.scrollView.getScrollResponder();
+      scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
+      React.findNodeHandle(this.refs[type]),
+        110, //additionalOffset
+        true
+      );
+    }, 50);
+  },
   render: function() {
     return (
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} ref='scrollView' keyboardDismissMode='on-drag' keyboardShouldPersistTaps={false}>
         <View style={styles.venueCard}>
-          <Image
-            style={styles.venuePhoto}
-            source={{uri: this.state.photo_url}}
-          />
+          {this.image()}
 
           <View style={styles.venueInfo}>
             <Text style={styles.venueName}>
@@ -186,7 +208,8 @@ module.exports = React.createClass({
             placeholder='Tips and tricks for your guests here.'
             onChangeText={this.changeDescription}
             value={this.state.description}
-            multiline={true}
+            ref='description'
+            onFocus={this.handleFocus('description')}
           />
 
         </View>

@@ -38,16 +38,13 @@ var styles = StyleSheet.create({
 });
 
 module.exports = React.createClass({
-  onChange: function(e) {
-    this.props.onChange(e.target.value);
-  },
   editingBox: function() {
     return (
       <View style={styles.box}>
         <TextInput
           style={styles.description}
           placeholder={this.props.label}
-          onChangeText={this.onChange}
+          onChangeText={this.props.onChange}
           value={this.props.value}
         />
       </View>

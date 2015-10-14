@@ -13,15 +13,22 @@ var {
 } = React;
 
 var styles = StyleSheet.create({
-  square: {
+  bubble: {
+    position: 'absolute',
+    top: 0,
+    left: 40,
+    height: 40,
+    width: 40,
+    backgroundColor: Color.black,
+    borderColor: Color.white,
+    borderWidth: 2,
     padding: 5,
-    margin: 5,
-    width: 70,
-    height: 90,
-    marginTop: 10,
-    backgroundColor: Color.white,
-    borderColor: Color.light_blue,
-    borderWidth: 1,
+    borderRadius: 999,
+  },
+  symbol: {
+    textAlign: 'center',
+    color: Color.white,
+    marginTop: 5,
   },
 });
 
@@ -30,8 +37,8 @@ module.exports = React.createClass({
     if (!this.props.show) return <View/>;
 
     return (
-      <TouchableHighlight style={styles.square} onPress={this.props.onPress} >
-        <Text>X</Text>
+      <TouchableHighlight style={styles.bubble} onPress={this.props.onPress}>
+        <Text style={styles.symbol}>X</Text>
       </TouchableHighlight>
     );
   }
