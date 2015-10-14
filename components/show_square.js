@@ -7,6 +7,7 @@ var Subscribable = require('Subscribable');
 var Url = require('./url');
 var Color = require('./color');
 var SquareInfoBox = require('./square_info_box');
+var SquareNameBox = require('./square_name_box');
 
 var {
   StyleSheet,
@@ -43,11 +44,6 @@ var styles = StyleSheet.create({
     padding: 20,
     flex: 1,
   },
-  venueName: {
-    color: Color.black,
-    paddingBottom: 10,
-    fontSize: 16,
-  },
   venueInfoBox: {
     width: 250,
     paddingBottom: 10,
@@ -79,8 +75,6 @@ module.exports = React.createClass({
     this.load();
 
     return {
-      photo_url: '',
-      description: '',
       editing: false,
     };
   },
@@ -175,9 +169,12 @@ module.exports = React.createClass({
           {this.image()}
 
           <View style={styles.venueInfo}>
-            <Text style={styles.venueName}>
-              {this.state.name}
-            </Text>
+            <SquareNameBox
+              value={this.state.name}
+              onChange={this.change('name')}
+              editing={this.state.editing}
+            />
+
             <TouchableHighlight style={styles.edit} onPress={(e) => this.startEditing()}>
               <Text style={styles.venueName}>
                 Edit
