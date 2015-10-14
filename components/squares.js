@@ -69,7 +69,7 @@ module.exports = React.createClass({
             return (
               <Square
                 key={square.id}
-                onPress={(e) => this.props.onPress(square.id, square.order)}
+                onPress={this.props.onPress}
                 onLongPress={(e) => this.handleLongPress(square)}
                 editing={square.id == this.state.editing_id}
                 onDestroy={this.props.destroySquare}

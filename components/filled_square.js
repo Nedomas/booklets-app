@@ -48,7 +48,7 @@ module.exports = React.createClass({
     return (
       <TouchableHighlight
         style={styles.square}
-        onPress={this.props.onPress}
+        onPress={(e) => this.props.onPress(this.props.id)}
         onLongPress={this.props.onLongPress}
         onPressIn={this.pressIn}
         onPressOut={this.pressOut}

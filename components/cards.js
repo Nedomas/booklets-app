@@ -65,8 +65,11 @@ module.exports = React.createClass({
       this.setState({ loading: false, squares: squares });
     });
   },
+  findSquare(square_id) {
+    return _.find(this.state.squares, { id: square_id });
+  },
   addVenue(square_id) {
-    var square = _.find(this.state.squares, { id: square_id });
+    var square = this.findSquare(square_id);
 
     this.props.navigator.push({
       title: 'Search for a venue',
@@ -91,16 +94,19 @@ module.exports = React.createClass({
   handleRightButtonPress(data) {
     this.event_emitter.emit('rightButtonPress', {});
   },
-  handleEditPress(square_id, step) {
+  handleEditPress(square_id) {
+    const square = this.findSquare(square_id);
+
     this.props.navigator.push({
       title: name,
       component: ShowSquare,
       rightButtonTitle: 'Save',
       onRightButtonPress: this.handleRightButtonPress,
       passProps: {
-        square_id: square_id,
+        venue_id: square.venue_id,
+        square_id: square.id,
         type: 'local',
-        step: step,
+        square_order: square.order,
         events: this.event_emitter,
       },
     });
@@ -128,7 +134,7 @@ module.exports = React.createClass({
         squares={this.state.squares}
         addVenue={this.addVenue}
         print={this.print}
-        editPress={this.handleEditPress}
+        onPress={this.handleEditPress}
         destroySquare={this.destroySquare}
       />
     }
