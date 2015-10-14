@@ -127,7 +127,7 @@ module.exports = React.createClass({
     this.props.navigator.push({
       title: square.name,
       component: ShowSquare,
-      rightButtonTitle: 'Save',
+      rightButtonTitle: 'Edit',
       onRightButtonPress: this.handleRightButtonPress,
       passProps: {
         venue_id: square.venue_id,

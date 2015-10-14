@@ -4,6 +4,7 @@ var _ = require('lodash');
 var SearchStep = require('./search_step');
 var Color = require('./color');
 var Square = require('./square');
+var SaveButton = require('./save_button');
 
 var {
   Image,
@@ -79,13 +80,7 @@ module.exports = React.createClass({
             );
           })}
 
-          <TouchableHighlight onPress={this.props.print}>
-            <View>
-              <Text style={styles.addVenuePlus}>
-                Print my map
-              </Text>
-            </View>
-          </TouchableHighlight>
+          <SaveButton onPress={this.props.print} text='Print my map'/>
         </View>
       </View>
     );

@@ -24,15 +24,13 @@ var styles = StyleSheet.create({
     color: Color.black,
     fontSize: 11,
   },
-  description: {
-    height: 100,
+  input: {
+    height: 40,
     borderColor: Color.light_blue,
     backgroundColor: Color.white,
     borderWidth: 1,
     borderRadius: 4,
     padding: 10,
-    margin: 20,
-    marginTop: 0,
     fontSize: 14,
   },
 });
@@ -42,7 +40,7 @@ module.exports = React.createClass({
     return (
       <View style={styles.box}>
         <TextInput
-          style={styles.description}
+          style={styles.input}
           placeholder={this.props.label}
           onChangeText={this.props.onChange}
           value={this.props.value}

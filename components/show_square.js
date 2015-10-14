@@ -8,6 +8,7 @@ var Url = require('./url');
 var Color = require('./color');
 var SquareInfoBox = require('./square_info_box');
 var SquareNameBox = require('./square_name_box');
+var SaveButton = require('./save_button');
 
 var {
   StyleSheet,
@@ -79,7 +80,7 @@ module.exports = React.createClass({
     };
   },
   componentDidMount() {
-    this.addListenerOn(this.props.events, 'rightButtonPress', this.save);
+    this.addListenerOn(this.props.events, 'rightButtonPress', (e) => this.startEditing());
   },
   changeDescription(description) {
     this.setState({ description });
@@ -175,11 +176,6 @@ module.exports = React.createClass({
               editing={this.state.editing}
             />
 
-            <TouchableHighlight style={styles.edit} onPress={(e) => this.startEditing()}>
-              <Text style={styles.venueName}>
-                Edit
-              </Text>
-            </TouchableHighlight>
             <SquareInfoBox
               label='ADDRESS'
               value={this.state.address}
@@ -207,7 +203,10 @@ module.exports = React.createClass({
             value={this.state.description}
             ref='description'
             onFocus={this.handleFocus('description')}
+            multiline
           />
+
+          <SaveButton text='Save' onPress={this.save}/>
 
         </View>
       </ScrollView>
