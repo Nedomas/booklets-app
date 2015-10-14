@@ -13,8 +13,8 @@ module.exports = class Url {
     return `${this.serverUrl()}/venues/search`;
   }
 
-  static findSquare(square_id) {
-    return `${this.serverUrl()}/squares/find/${square_id}`;
+  static findSquare(square_id, venue_id) {
+    return `${this.serverUrl()}/squares/find/${square_id}/${venue_id}`;
   }
 
   static newSquare(booklet_id, venue_id) {

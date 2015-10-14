@@ -125,7 +125,8 @@ module.exports = React.createClass({
       onRightButtonPress: this.handleRightButtonPress,
       passProps: {
         venue_id: venue_id,
-        step: this.props.step,
+        square_id: this.props.square_id,
+        square_order: this.props.square_order,
         events: this.event_emitter,
       },
     });
@@ -174,7 +175,7 @@ module.exports = React.createClass({
     return (
       <ScrollView style={styles.container} automaticallyAdjustContentInsets={false}>
         <Text style={styles.progress}>
-          STEP {this.props.step} OF 16
+          STEP {this.props.square_order} OF 12
         </Text>
         <Text style={styles.question}>
           {this.question()}

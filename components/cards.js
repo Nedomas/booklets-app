@@ -8,13 +8,16 @@ var Url = require('./url');
 var Color = require('./color');
 
 var ShowSquare = require('./show_square');
+var Email = require('./email');
 
 var {
   Image,
   StyleSheet,
   Text,
   View,
+  WebView,
   TouchableHighlight,
+  LinkingIOS,
 } = React;
 
 var styles = StyleSheet.create({
@@ -62,29 +65,22 @@ module.exports = React.createClass({
       this.setState({ loading: false, squares: squares });
     });
   },
-  addVenue() {
+  addVenue(square_id) {
+    var square = _.find(this.state.squares, { id: square_id });
+
     this.props.navigator.push({
       title: 'Search for a venue',
       component: SearchStep,
       passProps: {
-        step: this.nextStepNumber(),
+        square_id: square.id,
+        square_order: square.order,
       },
     });
   },
   print() {
-    var opts = {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }
+    var booklet_id = 1;
 
-    var booklet_id = 1
-
-    fetch(Url.print(booklet_id), opts).then((resp) => {
-      alert('done');
-    });
+    LinkingIOS.openURL(Url.print(booklet_id));
   },
   nextStepNumber() {
     return this.state.squares.length + 1;

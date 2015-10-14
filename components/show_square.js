@@ -89,15 +89,6 @@ module.exports = React.createClass({
   changeDescription(description) {
     this.setState({ description });
   },
-  saveUrl() {
-    var booklet_id = 1;
-
-    if (this.props.square_id) {
-      return Url.updateSquare(booklet_id, this.props.square_id);
-    } else {
-      return Url.createSquare(booklet_id, this.props.venue_id);
-    }
-  },
   save() {
     this.execSave().then((resp) => {
       this.props.navigator.popToTop();
@@ -120,22 +111,15 @@ module.exports = React.createClass({
       body: JSON.stringify(this.saveData())
     }
 
-    return fetch(this.saveUrl(), opts);
-  },
-  dataUrl() {
-    if (this.props.square_id) {
-      return Url.findSquare(this.props.square_id);
-    } else {
-      var booklet_id = 1;
-      return Url.newSquare(booklet_id, this.props.venue_id);
-    }
+    var booklet_id = 1;
+    return fetch(Url.updateSquare(booklet_id, this.props.square_id), opts);
   },
   load() {
     var opts = {
       method: 'GET'
     }
 
-    fetch(this.dataUrl(), opts).then((resp) => {
+    fetch(Url.findSquare(this.props.square_id, this.props.venue_id), opts).then((resp) => {
       var square = JSON.parse(resp._bodyText).square
 
       this.setState({

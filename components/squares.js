@@ -73,20 +73,11 @@ module.exports = React.createClass({
                 onLongPress={(e) => this.handleLongPress(square)}
                 editing={square.id == this.state.editing_id}
                 onDestroy={this.props.destroySquare}
+                addVenue={this.props.addVenue}
                 {...square}
               />
             );
           })}
-          <TouchableHighlight style={styles.square} onPress={this.props.addVenue}>
-            <View>
-              <Text style={styles.addVenuePlus}>
-                +
-              </Text>
-              <Text style={styles.addVenueText}>
-                ADD YOUR FAVORITE PLACE
-              </Text>
-            </View>
-          </TouchableHighlight>
 
           <TouchableHighlight onPress={this.props.print}>
             <View>
