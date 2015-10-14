@@ -108,9 +108,7 @@ module.exports = React.createClass({
     });
   },
   print() {
-    var booklet_id = 1;
-
-    LinkingIOS.openURL(Url.print(booklet_id));
+    LinkingIOS.openURL(Url.print());
   },
   nextStepNumber() {
     return this.state.squares.length + 1;

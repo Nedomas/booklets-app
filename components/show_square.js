@@ -112,7 +112,7 @@ module.exports = React.createClass({
     }
 
     var booklet_id = 1;
-    return fetch(Url.updateSquare(booklet_id, this.props.square_id), opts);
+    return fetch(Url.updateSquare(this.props.square_id), opts);
   },
   load() {
     var opts = {
