@@ -10,6 +10,8 @@ var Color = require('./color');
 var ShowSquare = require('./show_square');
 var Email = require('./email');
 
+const BOOKLET_STORAGE_KEY = '@booklets:booklet_id';
+
 var {
   Image,
   StyleSheet,
@@ -18,6 +20,7 @@ var {
   WebView,
   TouchableHighlight,
   LinkingIOS,
+  AsyncStorage,
 } = React;
 
 var styles = StyleSheet.create({
@@ -49,7 +52,31 @@ module.exports = React.createClass({
     this.setState({ loading: true });
     this.getSquares();
   },
-  getSquares() {
+  async createBooklet() {
+    var opts = {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }
+
+    const resp = await fetch(Url.createBooklet(), opts);
+    var booklet_id = JSON.parse(resp._bodyText).booklet_id;
+
+    await this.saveBookletId(booklet_id);
+    return booklet_id;
+  },
+  async ensureBooklet() {
+    var id = await AsyncStorage.getItem(BOOKLET_STORAGE_KEY);
+    Url.booklet_id = id ? id : this.createBooklet();
+  },
+  async saveBookletId(booklet_id) {
+    return AsyncStorage.setItem(BOOKLET_STORAGE_KEY, String(booklet_id));
+  },
+  async getSquares() {
+    await this.ensureBooklet();
+
     var opts = {
       method: 'GET',
       headers: {
@@ -60,7 +87,7 @@ module.exports = React.createClass({
 
     var booklet_id = 1
 
-    fetch(Url.allSquares(booklet_id), opts).then((resp) => {
+    fetch(Url.allSquares(), opts).then((resp) => {
       var squares = JSON.parse(resp._bodyText).squares
       this.setState({ loading: false, squares: squares });
     });

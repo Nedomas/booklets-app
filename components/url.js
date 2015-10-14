@@ -1,3 +1,9 @@
+var React = require('react-native');
+
+var {
+  AsyncStorage,
+} = React;
+
 module.exports = class Url {
   static serverUrl() {
     // return 'https://booklets.herokuapp.com';
@@ -5,8 +11,12 @@ module.exports = class Url {
     // return 'http://192.168.1.3:3000';
   }
 
-  static allSquares(booklet_id) {
-    return `${this.serverUrl()}/squares/${booklet_id}/all`;
+  static createBooklet() {
+    return `${this.serverUrl()}/booklets/create`;
+  }
+
+  static allSquares() {
+    return `${this.serverUrl()}/squares/${this.booklet_id}/all`;
   }
 
   static venuesSearch() {
@@ -18,15 +28,15 @@ module.exports = class Url {
   }
 
   static newSquare(booklet_id, venue_id) {
-    return `${this.serverUrl()}/squares/${booklet_id}/new/${venue_id}`;
+    return `${this.serverUrl()}/squares/${this.booklet_id}/new/${venue_id}`;
   }
 
   static createSquare(booklet_id, venue_id) {
-    return `${this.serverUrl()}/squares/${booklet_id}/create/${venue_id}`;
+    return `${this.serverUrl()}/squares/${this.booklet_id}/create/${venue_id}`;
   }
 
   static updateSquare(booklet_id, square_id) {
-    return `${this.serverUrl()}/squares/${booklet_id}/update/${square_id}`;
+    return `${this.serverUrl()}/squares/${this.booklet_id}/update/${square_id}`;
   }
 
   static destroySquare(square_id) {
@@ -34,6 +44,6 @@ module.exports = class Url {
   }
 
   static print(booklet_id) {
-    return `${this.serverUrl()}/booklets/${booklet_id}/print`;
+    return `${this.serverUrl()}/booklets/${this.booklet_id}/print`;
   }
 }
