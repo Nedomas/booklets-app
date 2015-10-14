@@ -69,7 +69,9 @@ module.exports = React.createClass({
   },
   async ensureBooklet() {
     var id = await AsyncStorage.getItem(BOOKLET_STORAGE_KEY);
-    Url.booklet_id = id ? id : this.createBooklet();
+    if (id) return Url.booklet_id = id;
+
+    Url.booklet_id = await this.createBooklet();
   },
   async saveBookletId(booklet_id) {
     return AsyncStorage.setItem(BOOKLET_STORAGE_KEY, String(booklet_id));
