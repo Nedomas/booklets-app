@@ -153,12 +153,15 @@ module.exports = React.createClass({
       this.setState({ squares: squares });
     });
   },
+  changableSquares() {
+    return _.select(this.state.squares, { changable: true });
+  },
   render: function() {
     if (this.state.loading) {
       var loader_or_squares = <Text>Loading</Text>
     } else {
       var loader_or_squares = <Squares
-        squares={this.state.squares}
+        squares={this.changableSquares()}
         addVenue={this.addVenue}
         print={this.print}
         onPress={this.handleEditPress}

@@ -7,8 +7,8 @@ var {
 module.exports = class Url {
   static serverUrl() {
     // return 'https://booklets.herokuapp.com';
-    // return 'http://localhost:3000';
-    return 'http://7da9610b.ngrok.com';
+    return 'http://localhost:3000';
+    // return 'http://7da9610b.ngrok.com';
   }
 
   static createBooklet() {

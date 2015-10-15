@@ -53723,7 +53723,7 @@ const square=this.findSquare(square_id);
 this.props.navigator.push({
 title:square.name,
 component:ShowSquare,
-rightButtonTitle:'Save',
+rightButtonTitle:'Edit',
 onRightButtonPress:this.handleRightButtonPress,
 passProps:{
 venue_id:square.venue_id,
@@ -66241,7 +66241,7 @@ openVenue:function(venue_id,name){
 this.props.navigator.push({
 title:name,
 component:ShowSquare,
-rightButtonTitle:'Save',
+rightButtonTitle:'Edit',
 onRightButtonPress:this.handleRightButtonPress,
 passProps:{
 venue_id:venue_id,
@@ -66316,9 +66316,9 @@ React.AsyncStorage;
 
 module.exports = (function(){function Url(){_classCallCheck(this,Url);}_createClass(Url,null,[{key:'serverUrl',value:
 function serverUrl(){
+return 'https://booklets.herokuapp.com';}},{key:'createBooklet',value:
 
 
-return 'http://7da9610b.ngrok.com';}},{key:'createBooklet',value:
 
 
 function createBooklet(){
@@ -66348,7 +66348,7 @@ return this.serverUrl() + '/squares/destroy/' + square_id;}},{key:'print',value:
 function print(){
 return this.serverUrl() + '/booklets/' + this.booklet_id + '/print';}}]);return Url;})();
 });
-__d('booklets/components/show_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/square_info_box.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/show_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js","booklets/components/save_button.js"],function(global, require, module, exports) {  'use strict';
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -66356,7 +66356,9 @@ var Subscribable=require('Subscribable');
 
 var Url=require('booklets/components/url.js');
 var Color=require('booklets/components/color.js');
-var SquareInfoBox=require('booklets/components/square_info_box.js');var 
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');
+var SaveButton=require('booklets/components/save_button.js');var 
 
 
 StyleSheet=
@@ -66393,11 +66395,6 @@ venueInfo:{
 padding:20,
 flex:1},
 
-venueName:{
-color:Color.black,
-paddingBottom:10,
-fontSize:16},
-
 venueInfoBox:{
 width:250,
 paddingBottom:10},
@@ -66429,20 +66426,18 @@ getInitialState:function(){
 this.load();
 
 return {
-photo_url:'',
-description:'',
 editing:false};},
 
 
-componentDidMount:function(){
-this.addListenerOn(this.props.events,'rightButtonPress',this.save);},
+componentDidMount:function(){var _this=this;
+this.addListenerOn(this.props.events,'rightButtonPress',function(e){return _this.startEditing();});},
 
 changeDescription:function(description){
 this.setState({description:description});},
 
-save:function(){var _this=this;
+save:function(){var _this2=this;
 this.execSave().then(function(resp){
-_this.props.navigator.popToTop();});},
+_this2.props.navigator.popToTop();});},
 
 
 saveData:function(){
@@ -66469,7 +66464,7 @@ body:JSON.stringify(this.saveData())};
 var booklet_id=1;
 return fetch(Url.updateSquare(this.props.square_id),opts);},
 
-load:function(){var _this2=this;
+load:function(){var _this3=this;
 var opts={
 method:'GET'};
 
@@ -66477,7 +66472,7 @@ method:'GET'};
 fetch(Url.findSquare(this.props.square_id,this.props.venue_id),opts).then(function(resp){
 var square=JSON.parse(resp._bodyText).square;
 
-_this2.setState({
+_this3.setState({
 name:square.name,
 address:square.address,
 phone:square.phone,
@@ -66488,11 +66483,11 @@ description:square.description});});},
 
 
 
-change:function(type){var _this3=this;
+change:function(type){var _this4=this;
 return function(value){
-var new_state=_this3.state;
+var new_state=_this4.state;
 new_state[type] = value;
-_this3.setState(new_state);};},
+_this4.setState(new_state);};},
 
 
 startEditing:function(){
@@ -66508,29 +66503,27 @@ source:{uri:this.state.photo_url}}));},
 
 
 
-handleFocus:function(type){var _this4=this;
+handleFocus:function(type){var _this5=this;
 setTimeout(function(e){
-var scrollResponder=_this4.refs.scrollView.getScrollResponder();
+var scrollResponder=_this5.refs.scrollView.getScrollResponder();
 scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-React.findNodeHandle(_this4.refs[type]),
+React.findNodeHandle(_this5.refs[type]),
 110,
 true);},
 
 50);},
 
-render:function(){var _this5=this;
+render:function(){
 return (
 React.createElement(ScrollView,{style:styles.container,ref:'scrollView',keyboardDismissMode:'on-drag',keyboardShouldPersistTaps:false},
 React.createElement(View,{style:styles.venueCard},
 this.image(),
 
 React.createElement(View,{style:styles.venueInfo},
-React.createElement(Text,{style:styles.venueName},
-this.state.name),
-
-React.createElement(TouchableHighlight,{style:styles.edit,onPress:function(e){return _this5.startEditing();}},
-React.createElement(Text,{style:styles.venueName},'Edit')),
-
+React.createElement(SquareNameBox,{
+value:this.state.name,
+onChange:this.change('name'),
+editing:this.state.editing}),
 
 
 React.createElement(SquareInfoBox,{
@@ -66559,7 +66552,11 @@ placeholder:'Tips and tricks for your guests here.',
 onChangeText:this.changeDescription,
 value:this.state.description,
 ref:'description',
-onFocus:this.handleFocus('description')}))));}});
+onFocus:this.handleFocus('description'),
+multiline:true}),
+
+
+React.createElement(SaveButton,{text:'Save',onPress:this.save}))));}});
 });
 __d('booklets/components/color.js',[],function(global, require, module, exports) {  module.exports = {
 gray:'#F9F9FB',
@@ -66595,15 +66592,13 @@ value:{
 color:Color.black,
 fontSize:11},
 
-description:{
-height:100,
+input:{
+height:40,
 borderColor:Color.light_blue,
 backgroundColor:Color.white,
 borderWidth:1,
 borderRadius:4,
 padding:10,
-margin:20,
-marginTop:0,
 fontSize:14}});
 
 
@@ -66613,7 +66608,7 @@ editingBox:function(){
 return (
 React.createElement(View,{style:styles.box},
 React.createElement(TextInput,{
-style:styles.description,
+style:styles.input,
 placeholder:this.props.label,
 onChangeText:this.props.onChange,
 value:this.props.value})));},
@@ -66636,12 +66631,101 @@ this.props.value)));},
 render:function(){
 return this.props.editing?this.editingBox():this.infoBox();}});
 });
-__d('booklets/components/squares.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/square.js"],function(global, require, module, exports) {  var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};var React=require('react-native/Libraries/react-native/react-native.js');
+__d('booklets/components/square_name_box.js',["react-native/Libraries/react-native/react-native.js","booklets/components/color.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+
+var Color=require('booklets/components/color.js');var 
+
+
+StyleSheet=
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;
+
+var styles=StyleSheet.create({
+venueName:{
+color:Color.black,
+paddingBottom:10,
+fontSize:16},
+
+input:{
+height:40,
+borderColor:Color.light_blue,
+backgroundColor:Color.white,
+borderWidth:1,
+borderRadius:4,
+padding:10,
+fontSize:14}});
+
+
+
+module.exports = React.createClass({displayName:'exports',
+editingBox:function(){
+return (
+React.createElement(TextInput,{
+style:styles.input,
+placeholder:this.props.label,
+onChangeText:this.props.onChange,
+value:this.props.value}));},
+
+
+
+name:function(){
+return (
+React.createElement(Text,{style:styles.venueName},
+this.props.value));},
+
+
+
+render:function(){
+return this.props.editing?this.editingBox():this.name();}});
+});
+__d('booklets/components/save_button.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var SearchStep=require('booklets/components/search_step.js');
+var Color=require('booklets/components/color.js');var 
+
+
+Image=
+
+
+
+
+React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.View;var TouchableHighlight=React.TouchableHighlight;
+
+var styles=StyleSheet.create({
+button:{
+backgroundColor:Color.black,
+borderColor:Color.white,
+borderWidth:2,
+padding:30,
+flex:1},
+
+text:{
+textAlign:'center',
+fontSize:17,
+color:Color.white}});
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){
+return (
+React.createElement(View,null,
+React.createElement(TouchableHighlight,{style:styles.button,onPress:this.props.onPress},
+React.createElement(Text,{style:styles.text},
+this.props.text))));}});
+});
+__d('booklets/components/squares.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/square.js","booklets/components/save_button.js"],function(global, require, module, exports) {  var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
 
 var SearchStep=require('booklets/components/search_step.js');
 var Color=require('booklets/components/color.js');
-var Square=require('booklets/components/square.js');var 
+var Square=require('booklets/components/square.js');
+var SaveButton=require('booklets/components/save_button.js');var 
 
 
 Image=
@@ -66717,9 +66801,7 @@ square)));}),
 
 
 
-React.createElement(TouchableHighlight,{onPress:this.props.print},
-React.createElement(View,null,
-React.createElement(Text,{style:styles.addVenuePlus},'Print my map'))))));}});
+React.createElement(SaveButton,{onPress:this.props.print,text:'Print my map'}))));}});
 });
 __d('booklets/components/square.js',["react-native/Libraries/react-native/react-native.js","booklets/components/empty_square.js","booklets/components/filled_square.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 

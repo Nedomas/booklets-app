@@ -1,5 +1,6 @@
 var React = require('react-native');
 var _ = require('lodash');
+var Icon = require('react-native-vector-icons/MaterialIcons');
 
 var SearchStep = require('./search_step');
 var Color = require('./color');
@@ -34,6 +35,18 @@ var styles = StyleSheet.create({
   },
 });
 
+const ICON_CATEGORY_MAPPINGS = {
+  cafe: 'local-cafe',
+  food: '',
+  nightlife: '',
+  outdoors: '',
+  shop: '',
+  camping: '',
+  accomodation: '',
+  sports: '',
+  text: '',
+};
+
 module.exports = React.createClass({
   render: function() {
     return (
@@ -42,6 +55,7 @@ module.exports = React.createClass({
         onPress={(e) => this.props.addVenue(this.props.id)}
       >
         <View>
+          <Icon name={ICON_CATEGORY_MAPPINGS[this.props.category]} size={30} color="#900" />
         </View>
       </TouchableHighlight>
     );
