@@ -8,8 +8,6 @@ var {
   StyleSheet,
 } = React;
 
-var gray = '#F9F9FB';
-
 var styles = StyleSheet.create({
   container: {
     flex: 1,

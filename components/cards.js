@@ -9,6 +9,7 @@ var Color = require('./color');
 
 var ShowSquare = require('./show_square');
 var Email = require('./email');
+var SaveButton = require('./save_button');
 
 const BOOKLET_STORAGE_KEY = '@booklets:booklet_id';
 
@@ -26,10 +27,10 @@ var {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 100,
+    paddingTop: 78,
     backgroundColor: Color.gray,
-    paddingLeft: 40,
-    paddingRight: 40,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
 });
 
@@ -156,17 +157,26 @@ module.exports = React.createClass({
   changableSquares() {
     return _.select(this.state.squares, { changable: true });
   },
+  squares() {
+    return (
+      <View>
+        <Squares
+          squares={this.changableSquares()}
+          addVenue={this.addVenue}
+          print={this.print}
+          onPress={this.handleEditPress}
+          destroySquare={this.destroySquare}
+        />
+
+        <SaveButton onPress={this.print} text='Print my map'/>
+      </View>
+    );
+  },
   render: function() {
     if (this.state.loading) {
       var loader_or_squares = <Text>Loading</Text>
     } else {
-      var loader_or_squares = <Squares
-        squares={this.changableSquares()}
-        addVenue={this.addVenue}
-        print={this.print}
-        onPress={this.handleEditPress}
-        destroySquare={this.destroySquare}
-      />
+      var loader_or_squares = this.squares();
     }
 
     return (
