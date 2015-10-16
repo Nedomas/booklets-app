@@ -4,6 +4,7 @@ var _ = require('lodash');
 var SearchStep = require('./search_step');
 var Color = require('./color');
 var Square = require('./square');
+var ProgressBar = require('./progress_bar');
 
 var {
   Image,
@@ -12,6 +13,7 @@ var {
   View,
   TouchableHighlight,
 } = React;
+
 
 var styles = StyleSheet.create({
   squaresContainer: {
@@ -34,6 +36,7 @@ module.exports = React.createClass({
   render: function() {
     return (
       <View style={styles.container}>
+        <ProgressBar squares={this.props.squares} />
         <View style={styles.squaresContainer}>
           {_.map(this.props.squares, (square) => {
             return (

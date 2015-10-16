@@ -58,8 +58,8 @@ module.exports = React.createClass({
     return (
       <TouchableHighlight
         style={styles.square}
-        onPress={(e) => this.props.addVenue(this.props.id)}
-      >
+        onPress={(e) => this.props.addVenue(this.props.id)}>
+
         <View>
           <Icon style={styles.icon} name={ICON_CATEGORY_MAPPINGS[this.props.category]} size={50} />
         </View>

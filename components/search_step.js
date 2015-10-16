@@ -7,6 +7,8 @@ var EventEmitter = require('EventEmitter');
 var Url = require('./url');
 var ShowSquare = require('./show_square');
 var Color = require('./color');
+var ProgressBar = require('./progress_bar');
+var VenueSearchItem = require('./venue_search_item');
 
 var {
   ActivityIndicatorIOS,
@@ -24,13 +26,8 @@ var styles = StyleSheet.create({
     flex: 1,
     paddingTop: 75,
     backgroundColor: Color.gray,
-    paddingLeft: 40,
-    paddingRight: 40,
-  },
-  progress: {
-    paddingBottom: 16,
-    fontSize: 11,
-    textAlign: 'center',
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   question: {
     paddingBottom: 10,
@@ -138,10 +135,10 @@ module.exports = React.createClass({
       'What is your favorite bar?',
     ];
 
-    var question_no = this.props.step;
-    if (question_no > questions.length) question_no = questions.length;
-
-    return questions[question_no - 1];
+    // var question_no = this.props.step;
+    // if (question_no > questions.length) question_no = questions.length;
+    //
+    return questions[1];
   },
   render: function() {
     if (this.state.loading) {
@@ -150,23 +147,7 @@ module.exports = React.createClass({
       var bottom_part = <View style={styles.venueList}>
         {_.map(this.state.venues, (venue) => {
           return (
-            <TouchableHighlight key={venue.id} onPress={(e) => { this.openVenue(venue.id, venue.name) }}>
-              <View style={styles.venueItem}>
-                <Image
-                  style={styles.venuePhoto}
-                  source={{uri: venue.photo_urls[0]}}
-                >
-                  <View style={styles.insideVenuePhoto}>
-                    <Text style={styles.venueName}>
-                      {venue.name}
-                    </Text>
-                    <Text style={styles.venueAddress}>
-                      {venue.address}
-                    </Text>
-                  </View>
-                </Image>
-              </View>
-            </TouchableHighlight>
+            <VenueSearchItem {...venue} onPress={this.openVenue} />
           );
         })}
       </View>
@@ -174,9 +155,7 @@ module.exports = React.createClass({
 
     return (
       <ScrollView style={styles.container} automaticallyAdjustContentInsets={false}>
-        <Text style={styles.progress}>
-          STEP {this.props.square_order} OF 12
-        </Text>
+        <ProgressBar squares={this.props.squares} />
         <Text style={styles.question}>
           {this.question()}
         </Text>

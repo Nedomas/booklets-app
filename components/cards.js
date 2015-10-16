@@ -27,7 +27,7 @@ var {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 78,
+    paddingTop: 75,
     backgroundColor: Color.gray,
     paddingLeft: 10,
     paddingRight: 10,
@@ -107,6 +107,7 @@ module.exports = React.createClass({
       passProps: {
         square_id: square.id,
         square_order: square.order,
+        squares: this.state.squares,
       },
     });
   },
