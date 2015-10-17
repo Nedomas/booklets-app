@@ -14,16 +14,19 @@ var {
 
 var styles = StyleSheet.create({
   button: {
-    backgroundColor: Color.black,
-    borderColor: Color.white,
-    borderWidth: 2,
-    padding: 30,
+    backgroundColor: Color.transparent_red,
+    borderColor: Color.red,
+    borderWidth: 1,
+    padding: 15,
     flex: 1,
+    marginLeft: 5,
+    marginRight: 5,
+    borderRadius: 5,
   },
   text: {
     textAlign: 'center',
-    fontSize: 17,
-    color: Color.white,
+    fontSize: 13,
+    color: Color.red,
   },
 });
 

@@ -108,6 +108,7 @@ module.exports = React.createClass({
         square_id: square.id,
         square_order: square.order,
         squares: this.state.squares,
+        square_category: square.category,
       },
     });
   },
@@ -169,7 +170,7 @@ module.exports = React.createClass({
           destroySquare={this.destroySquare}
         />
 
-        <SaveButton onPress={this.print} text='Print my map'/>
+        <SaveButton onPress={this.print} text='PRINT MY BOOKLET'/>
       </View>
     );
   },

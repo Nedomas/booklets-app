@@ -9,6 +9,7 @@ var ShowSquare = require('./show_square');
 var Color = require('./color');
 var ProgressBar = require('./progress_bar');
 var VenueSearchItem = require('./venue_search_item');
+var CategorySelect = require('./category_select');
 
 var {
   ActivityIndicatorIOS,
@@ -82,6 +83,7 @@ module.exports = React.createClass({
   getInitialState() {
     return {
       query: '',
+      category: this.props.square_category,
       venues: []
     };
   },
@@ -140,6 +142,9 @@ module.exports = React.createClass({
     //
     return questions[1];
   },
+  changeCategory(new_category) {
+    this.setState({ category: new_category });
+  },
   render: function() {
     if (this.state.loading) {
       var bottom_part = <ActivityIndicatorIOS style={styles.loader} animating={true} size='large' color={Color.dark_gray} />
@@ -147,7 +152,7 @@ module.exports = React.createClass({
       var bottom_part = <View style={styles.venueList}>
         {_.map(this.state.venues, (venue) => {
           return (
-            <VenueSearchItem {...venue} onPress={this.openVenue} />
+            <VenueSearchItem key={venue.id} {...venue} onPress={this.openVenue} />
           );
         })}
       </View>
@@ -156,9 +161,7 @@ module.exports = React.createClass({
     return (
       <ScrollView style={styles.container} automaticallyAdjustContentInsets={false}>
         <ProgressBar squares={this.props.squares} />
-        <Text style={styles.question}>
-          {this.question()}
-        </Text>
+        <CategorySelect category={this.state.category} onChange={this.changeCategory}/>
         <TextInput
           style={styles.answer}
           onChangeText={this.changeQuery}

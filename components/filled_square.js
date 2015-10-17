@@ -16,19 +16,20 @@ var {
 var styles = StyleSheet.create({
   square: {
     padding: 5,
-    margin: 5,
-    width: 70,
+    marginBottom: 10,
+    marginRight: 5,
+    marginLeft: 5,
+    width: 90,
     height: 90,
-    marginTop: 10,
     backgroundColor: Color.white,
     borderColor: Color.light_blue,
     borderWidth: 1,
   },
   squarePhoto: {
-    height: 30,
+    height: 50,
   },
   squareName: {
-    paddingTop: 10,
+    paddingTop: 5,
     fontSize: 10,
     color: Color.black,
   },

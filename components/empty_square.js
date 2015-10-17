@@ -26,14 +26,6 @@ var styles = StyleSheet.create({
     borderColor: Color.light_blue,
     borderWidth: 1,
   },
-  squarePhoto: {
-    height: 30,
-  },
-  squareName: {
-    paddingTop: 10,
-    fontSize: 10,
-    color: Color.black,
-  },
   icon: {
     color: Color.light_blue,
     textAlign: 'center',
