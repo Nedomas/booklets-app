@@ -51,7 +51,7 @@ var styles = StyleSheet.create({
 module.exports = React.createClass({
   render: function() {
     return (
-      <TouchableHighlight key={this.props.id} onPress={(e) => { this.props.onPress(this.props.venue_id, this.props.name) }}>
+      <TouchableHighlight onPress={this.props.onPress}>
         <View style={styles.venueItem}>
           <Image
             style={styles.venuePhoto}

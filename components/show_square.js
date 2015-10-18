@@ -73,10 +73,14 @@ var styles = StyleSheet.create({
 module.exports = React.createClass({
   mixins: [Subscribable.Mixin],
   getInitialState() {
-    this.load();
-
     return {
       editing: false,
+      name: this.props.square.name,
+      address: this.props.square.address,
+      description: this.props.square.description,
+      phone: this.props.square.phone,
+      website: this.props.square.website,
+      photo_url: this.props.square.photo_url,
     };
   },
   componentDidMount() {
@@ -92,13 +96,13 @@ module.exports = React.createClass({
   },
   saveData() {
     return {
-      venue_id: this.props.venue_id,
-      order: this.props.step,
+      venue_id: this.props.square.venue_id,
       description: this.state.description,
       name: this.state.name,
       address: this.state.address,
       phone: this.state.phone,
       website: this.state.website,
+      photo_url: this.state.photo_url,
     };
   },
   execSave() {
@@ -112,26 +116,7 @@ module.exports = React.createClass({
     }
 
     var booklet_id = 1;
-    return fetch(Url.updateSquare(this.props.square_id), opts);
-  },
-  load() {
-    var opts = {
-      method: 'GET'
-    }
-
-    fetch(Url.findSquare(this.props.square_id, this.props.venue_id), opts).then((resp) => {
-      var square = JSON.parse(resp._bodyText).square
-
-      this.setState({
-        name: square.name,
-        address: square.address,
-        phone: square.phone,
-        photo_url: square.photo_url,
-        photo_urls: square.photo_urls,
-        website: square.website,
-        description: square.description,
-      });
-    });
+    return fetch(Url.updateSquare(this.props.square.id), opts);
   },
   change: function(type) {
     return (value) => {
@@ -165,7 +150,13 @@ module.exports = React.createClass({
   },
   render: function() {
     return (
-      <ScrollView style={styles.container} ref='scrollView' keyboardDismissMode='on-drag' keyboardShouldPersistTaps={false}>
+      <ScrollView
+        style={styles.container}
+        ref='scrollView'
+        keyboardDismissMode='on-drag'
+        automaticallyAdjustContentInsets={false}
+        keyboardShouldPersistTaps={false}>
+
         <View style={styles.venueCard}>
           {this.image()}
 

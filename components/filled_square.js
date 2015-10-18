@@ -50,7 +50,7 @@ module.exports = React.createClass({
       <View>
         <TouchableHighlight
           style={styles.square}
-          onPress={(e) => this.props.onPress(this.props.id)}
+          onPress={(e) => this.props.onPress(this.props)}
           onLongPress={this.props.onLongPress}
           onPressIn={this.pressIn}
           onPressOut={this.pressOut}
@@ -62,7 +62,7 @@ module.exports = React.createClass({
             />
 
             <Text style={styles.squareName}>
-              {this.props.name}
+              {_.trunc(this.props.name, 23)}
             </Text>
           </View>
         </TouchableHighlight>

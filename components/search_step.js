@@ -10,6 +10,7 @@ var Color = require('./color');
 var ProgressBar = require('./progress_bar');
 var VenueSearchItem = require('./venue_search_item');
 var CategorySelect = require('./category_select');
+var Loader = require('./loader');
 
 var {
   ActivityIndicatorIOS,
@@ -43,8 +44,7 @@ var styles = StyleSheet.create({
     padding: 10,
   },
   loader: {
-    marginTop: 150,
-    marginLeft: 100,
+    marginTop: 110,
   },
   venueList: {
     marginTop: 15,
@@ -83,7 +83,7 @@ module.exports = React.createClass({
   getInitialState() {
     return {
       query: '',
-      category: this.props.square_category,
+      category: this.props.square.category,
       venues: []
     };
   },
@@ -109,23 +109,25 @@ module.exports = React.createClass({
     }
 
     fetch(Url.venuesSearch(), opts).then((resp) => {
-      var venues = JSON.parse(resp._bodyText).venues
-      this.setState({ loading: false, venues: venues });
+      var venue_squares = JSON.parse(resp._bodyText).venue_squares;
+      this.setState({ loading: false, venue_squares: venue_squares });
     });
   },
   handleRightButtonPress(data) {
     this.event_emitter.emit('rightButtonPress', {});
   },
-  openVenue(venue_id, name) {
+  openVenueSquare(venue_square) {
+    venue_square.id = this.props.square.id;
+    venue_square.order = this.props.square.order;
+    venue_square.category = this.state.category;
+
     this.props.navigator.push({
-      title: name,
+      title: venue_square.name,
       component: ShowSquare,
       rightButtonTitle: 'Edit',
       onRightButtonPress: this.handleRightButtonPress,
       passProps: {
-        venue_id: venue_id,
-        square_id: this.props.square_id,
-        square_order: this.props.square_order,
+        square: venue_square,
         events: this.event_emitter,
       },
     });
@@ -147,12 +149,12 @@ module.exports = React.createClass({
   },
   render: function() {
     if (this.state.loading) {
-      var bottom_part = <ActivityIndicatorIOS style={styles.loader} animating={true} size='large' color={Color.dark_gray} />
+      var bottom_part = <Loader style={styles.loader} />;
     } else {
       var bottom_part = <View style={styles.venueList}>
-        {_.map(this.state.venues, (venue) => {
+        {_.map(this.state.venue_squares, (venue_square) => {
           return (
-            <VenueSearchItem key={venue.id} {...venue} onPress={this.openVenue} />
+            <VenueSearchItem {...venue_square} onPress={(e) => this.openVenueSquare(venue_square)} />
           );
         })}
       </View>

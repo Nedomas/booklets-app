@@ -10,6 +10,7 @@ var Color = require('./color');
 var ShowSquare = require('./show_square');
 var Email = require('./email');
 var SaveButton = require('./save_button');
+var Loader = require('./loader');
 
 const BOOKLET_STORAGE_KEY = '@booklets:booklet_id';
 
@@ -31,6 +32,9 @@ var styles = StyleSheet.create({
     backgroundColor: Color.gray,
     paddingLeft: 10,
     paddingRight: 10,
+  },
+  loader: {
+    marginTop: 160,
   },
 });
 
@@ -105,10 +109,8 @@ module.exports = React.createClass({
       title: 'Search for a venue',
       component: SearchStep,
       passProps: {
-        square_id: square.id,
-        square_order: square.order,
+        square: square,
         squares: this.state.squares,
-        square_category: square.category,
       },
     });
   },
@@ -124,19 +126,14 @@ module.exports = React.createClass({
   handleRightButtonPress(data) {
     this.event_emitter.emit('rightButtonPress', {});
   },
-  handleEditPress(square_id) {
-    const square = this.findSquare(square_id);
-
+  handleEditPress(square) {
     this.props.navigator.push({
       title: square.name,
       component: ShowSquare,
       rightButtonTitle: 'Edit',
       onRightButtonPress: this.handleRightButtonPress,
       passProps: {
-        venue_id: square.venue_id,
-        square_id: square.id,
-        type: 'local',
-        square_order: square.order,
+        square: square,
         events: this.event_emitter,
       },
     });
@@ -175,15 +172,9 @@ module.exports = React.createClass({
     );
   },
   render: function() {
-    if (this.state.loading) {
-      var loader_or_squares = <Text>Loading</Text>
-    } else {
-      var loader_or_squares = this.squares();
-    }
-
     return (
       <View style={styles.container}>
-        {loader_or_squares}
+        {this.state.loading ? <Loader style={styles.loader} /> : this.squares()}
       </View>
     );
   }
