@@ -6,9 +6,9 @@ var Subscribable = require('Subscribable');
 
 var Url = require('./url');
 var Color = require('./color');
-var SquareInfoBox = require('./square_info_box');
-var SquareNameBox = require('./square_name_box');
 var SaveButton = require('./save_button');
+var VenueDetail = require('./venue_detail');
+var TextDetail = require('./text_detail');
 
 var {
   StyleSheet,
@@ -27,46 +27,12 @@ var styles = StyleSheet.create({
     backgroundColor: Color.gray,
     paddingLeft: 20,
     paddingRight: 20,
-    paddingBottom: 20,
+    paddingBottom: 220,
   },
   progress: {
     paddingBottom: 16,
     fontSize: 11,
     textAlign: 'center',
-  },
-  venuePhoto: {
-    height: 150,
-  },
-  venueCard: {
-    backgroundColor: Color.white,
-    paddingBottom: 200,
-  },
-  venueInfo: {
-    padding: 20,
-    flex: 1,
-  },
-  venueInfoBox: {
-    width: 250,
-    paddingBottom: 10,
-  },
-  venueInfoLabel: {
-    color: Color.black,
-    fontSize: 11,
-  },
-  venueInfoValue: {
-    color: Color.black,
-    fontSize: 11,
-  },
-  description: {
-    height: 100,
-    borderColor: Color.light_blue,
-    backgroundColor: Color.white,
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: 10,
-    margin: 20,
-    marginTop: 0,
-    fontSize: 14,
   },
 });
 
@@ -138,15 +104,22 @@ module.exports = React.createClass({
       />
     );
   },
-  handleFocus(type) {
-    setTimeout((e) => {
-      let scrollResponder = this.refs.scrollView.getScrollResponder();
-      scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-      React.findNodeHandle(this.refs[type]),
-        110, //additionalOffset
-        true
+  detail() {
+    if (this.props.square.category == 'text') {
+      return (
+        <TextDetail
+          {...this.state}
+          onChange={this.change}
+        />
       );
-    }, 50);
+    } else {
+      return (
+        <VenueDetail
+          {...this.state}
+          onChange={this.change}
+        />
+      );
+    }
   },
   render: function() {
     return (
@@ -157,49 +130,9 @@ module.exports = React.createClass({
         automaticallyAdjustContentInsets={false}
         keyboardShouldPersistTaps={false}>
 
-        <View style={styles.venueCard}>
-          {this.image()}
+        {this.detail()}
 
-          <View style={styles.venueInfo}>
-            <SquareNameBox
-              value={this.state.name}
-              onChange={this.change('name')}
-              editing={this.state.editing}
-            />
-
-            <SquareInfoBox
-              label='ADDRESS'
-              value={this.state.address}
-              onChange={this.change('address')}
-              editing={this.state.editing}
-            />
-            <SquareInfoBox
-              label='PHONE'
-              value={this.state.phone}
-              onChange={this.change('phone')}
-              editing={this.state.editing}
-            />
-            <SquareInfoBox
-              label='WEBSITE'
-              value={this.state.website}
-              onChange={this.change('website')}
-              editing={this.state.editing}
-            />
-          </View>
-
-          <TextInput
-            style={styles.description}
-            placeholder='Tips and tricks for your guests here.'
-            onChangeText={this.changeDescription}
-            value={this.state.description}
-            ref='description'
-            onFocus={this.handleFocus('description')}
-            multiline
-          />
-
-          <SaveButton text='Save' onPress={this.save}/>
-
-        </View>
+        <SaveButton text='Save' onPress={this.save}/>
       </ScrollView>
     );
   }
