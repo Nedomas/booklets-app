@@ -147,10 +147,11 @@ module.exports = React.createClass({
       },
     }
 
+    this.setState({ loading: true });
     fetch(Url.destroySquare(square_id), opts).then((resp) => {
-      var squares = JSON.parse(resp._bodyText).squares
+      var squares = JSON.parse(resp._bodyText).squares;
 
-      this.setState({ squares: squares });
+      this.setState({ squares: squares, loading: false });
     });
   },
   changableSquares() {

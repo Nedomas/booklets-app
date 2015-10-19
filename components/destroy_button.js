@@ -15,8 +15,8 @@ var {
 var styles = StyleSheet.create({
   bubble: {
     position: 'absolute',
-    top: 0,
-    left: 40,
+    top: -10,
+    left: 65,
     height: 40,
     width: 40,
     backgroundColor: Color.black,
