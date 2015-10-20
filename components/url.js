@@ -35,6 +35,10 @@ module.exports = class Url {
     return `${this.serverUrl()}/squares/destroy/${square_id}`;
   }
 
+  static clearAll() {
+    return `${this.serverUrl()}/squares/${this.booklet_id}/clear_all`;
+  }
+
   static print() {
     return `${this.serverUrl()}/booklets/${this.booklet_id}/print`;
   }

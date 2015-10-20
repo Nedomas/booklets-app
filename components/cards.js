@@ -1,6 +1,7 @@
 var React = require('react-native');
 var _ = require('lodash');
 var EventEmitter = require('EventEmitter');
+var Subscribable = require('Subscribable');
 
 var SearchStep = require('./search_step');
 var Squares = require('./squares');
@@ -39,6 +40,7 @@ var styles = StyleSheet.create({
 });
 
 module.exports = React.createClass({
+  mixins: [Subscribable.Mixin],
   getInitialState() {
     this.getSquares();
     this.setupReloads();
@@ -56,6 +58,9 @@ module.exports = React.createClass({
 
     this.setState({ loading: true });
     this.getSquares();
+  },
+  componentDidMount() {
+    this.addListenerOn(this.props.events, 'rightButtonPress', (e) => this.clearAll());
   },
   async createBooklet() {
     var opts = {
@@ -136,6 +141,22 @@ module.exports = React.createClass({
         square: square,
         events: this.event_emitter,
       },
+    });
+  },
+  clearAll() {
+    var opts = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }
+
+    this.setState({ loading: true });
+    fetch(Url.clearAll(), opts).then((resp) => {
+      var squares = JSON.parse(resp._bodyText).squares;
+
+      this.setState({ squares: squares, loading: false });
     });
   },
   destroySquare(square_id) {
