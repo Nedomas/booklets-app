@@ -9,6 +9,7 @@ var Color = require('./color');
 var SaveButton = require('./save_button');
 var VenueDetail = require('./venue_detail');
 var TextDetail = require('./text_detail');
+var CoverDetail = require('./cover_detail');
 
 var {
   StyleSheet,
@@ -105,21 +106,15 @@ module.exports = React.createClass({
     );
   },
   detail() {
+    let Component = VenueDetail;
+
     if (this.props.square.category == 'text') {
-      return (
-        <TextDetail
-          {...this.state}
-          onChange={this.change}
-        />
-      );
-    } else {
-      return (
-        <VenueDetail
-          {...this.state}
-          onChange={this.change}
-        />
-      );
+      Component = TextDetail;
+    } else if (this.props.square.category == 'cover') {
+      Component = CoverDetail;
     }
+
+    return <Component {...this.state} onChange={this.change} />
   },
   render: function() {
     return (

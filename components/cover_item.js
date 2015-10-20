@@ -45,10 +45,6 @@ module.exports = React.createClass({
         <Text style={styles.squareName}>
           {_.trunc(this.props.name, 23)}
         </Text>
-
-        <Text style={styles.squareName}>
-          {_.trunc(this.props.description, 23)}
-        </Text>
       </View>
     );
   }

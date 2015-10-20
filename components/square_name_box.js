@@ -41,7 +41,7 @@ module.exports = React.createClass({
   },
   name: function() {
     return (
-      <Text style={styles.venueName}>
+      <Text style={[styles.venueName, this.props.style]}>
         {this.props.value}
       </Text>
     );

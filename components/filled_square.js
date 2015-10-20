@@ -52,12 +52,17 @@ module.exports = React.createClass({
       return <VenueItem {...this.props}/>
     }
   },
+  onPress() {
+    if (this.props.category == 'numbers') return;
+
+    this.props.onPress(this.props);
+  },
   render: function() {
     return (
       <View>
         <TouchableHighlight
           style={styles.square}
-          onPress={(e) => this.props.onPress(this.props)}
+          onPress={(e) => this.onPress()}
           onLongPress={this.props.onLongPress}
           onPressIn={this.pressIn}
           onPressOut={this.pressOut}
