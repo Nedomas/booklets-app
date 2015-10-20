@@ -35,16 +35,16 @@ var styles = StyleSheet.create({
 });
 
 module.exports = React.createClass({
-  focus(type) {
-    setTimeout((e) => {
-      let scrollResponder = this.props.scrollView.getScrollResponder();
-      scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-      React.findNodeHandle(this.refs[type]),
-        110, //additionalOffset
-        true
-      );
-    }, 50);
-  },
+  // focus(type) {
+  //   setTimeout((e) => {
+  //     let scrollResponder = this.props.scrollView.getScrollResponder();
+  //     scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
+  //     React.findNodeHandle(this.refs[type]),
+  //       110, //additionalOffset
+  //       true
+  //     );
+  //   }, 50);
+  // },
   image() {
     if (!this.props.photo_url) return false;
 
@@ -55,16 +55,16 @@ module.exports = React.createClass({
       />
     );
   },
-  handleFocus(type) {
-    setTimeout((e) => {
-      let scrollResponder = this.refs.scrollView.getScrollResponder();
-      scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-      React.findNodeHandle(this.refs[type]),
-        110, //additionalOffset
-        true
-      );
-    }, 50);
-  },
+  // handleFocus(type) {
+  //   setTimeout((e) => {
+  //     let scrollResponder = this.refs.scrollView.getScrollResponder();
+  //     scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
+  //     React.findNodeHandle(this.refs[type]),
+  //       110, //additionalOffset
+  //       true
+  //     );
+  //   }, 50);
+  // },
   render: function() {
     return (
       <View style={styles.venueCard}>

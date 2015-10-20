@@ -4,6 +4,10 @@ var _ = require('lodash');
 var SearchStep = require('./search_step');
 var Color = require('./color');
 var DestroyButton = require('./destroy_button');
+var VenueItem = require('./venue_item');
+var CoverItem = require('./cover_item');
+var TextItem = require('./text_item');
+var NumbersItem = require('./numbers_item');
 
 var {
   Image,
@@ -16,7 +20,7 @@ var {
 var styles = StyleSheet.create({
   square: {
     padding: 5,
-    marginBottom: 10,
+    paddingBottom: 0,
     marginRight: 5,
     marginLeft: 5,
     width: 90,
@@ -24,14 +28,6 @@ var styles = StyleSheet.create({
     backgroundColor: Color.white,
     borderColor: Color.light_blue,
     borderWidth: 1,
-  },
-  squarePhoto: {
-    height: 50,
-  },
-  squareName: {
-    paddingTop: 5,
-    fontSize: 10,
-    color: Color.black,
   },
 });
 
@@ -45,6 +41,17 @@ module.exports = React.createClass({
   pressOut: function() {
     console.log('press out');
   },
+  item() {
+    if (this.props.category == 'cover') {
+      return <CoverItem {...this.props}/>
+    } else if (this.props.category == 'text') {
+      return <TextItem {...this.props}/>
+    } else if (this.props.category == 'numbers') {
+      return <NumbersItem {...this.props}/>
+    } else {
+      return <VenueItem {...this.props}/>
+    }
+  },
   render: function() {
     return (
       <View>
@@ -55,16 +62,11 @@ module.exports = React.createClass({
           onPressIn={this.pressIn}
           onPressOut={this.pressOut}
          >
-          <View>
-            <Image
-              style={styles.squarePhoto}
-              source={{uri: this.props.photo_url}}
-            />
 
-            <Text style={styles.squareName}>
-              {_.trunc(this.props.name, 23)}
-            </Text>
-          </View>
+         <View>
+           {this.item()}
+         </View>
+
         </TouchableHighlight>
 
         <DestroyButton
