@@ -53567,17 +53567,16 @@ Object.keys(componentOrElement));}
 
 module.exports = findDOMNode;
 });
-__d('booklets/components/core.js',["react-native/Libraries/react-native/react-native.js","booklets/components/cards.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/core.js',["react-native/Libraries/react-native/react-native.js","EventEmitter","booklets/components/cards.js"],function(global, require, module, exports) {  'use strict';
 
 var React=require('react-native/Libraries/react-native/react-native.js');
+var EventEmitter=require('EventEmitter');
 var Cards=require('booklets/components/cards.js');var 
 
 
 NavigatorIOS=
 
 React.NavigatorIOS;var StyleSheet=React.StyleSheet;
-
-var gray='#F9F9FB';
 
 var styles=StyleSheet.create({
 container:{
@@ -53586,17 +53585,28 @@ flex:1}});
 
 
 module.exports = React.createClass({displayName:'exports',
+componentWillMount:function(){
+this.event_emitter = new EventEmitter();},
+
+handleRightButtonPress:function(data){
+this.event_emitter.emit('rightButtonPress',{});},
+
 render:function(){
 return (
 React.createElement(NavigatorIOS,{
 style:styles.container,
 initialRoute:{
+title:'Your Guide',
+rightButtonTitle:'Clear all',
 component:Cards,
-title:'Your Guide'}}));}});
+onRightButtonPress:this.handleRightButtonPress,
+passProps:{
+events:this.event_emitter}}}));}});
 });
-__d('booklets/components/cards.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/search_step.js","booklets/components/squares.js","booklets/components/url.js","booklets/components/color.js","booklets/components/show_square.js","booklets/components/email.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+__d('booklets/components/cards.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","Subscribable","booklets/components/search_step.js","booklets/components/squares.js","booklets/components/url.js","booklets/components/color.js","booklets/components/show_square.js","booklets/components/email.js","booklets/components/save_button.js","booklets/components/loader.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
 var EventEmitter=require('EventEmitter');
+var Subscribable=require('Subscribable');
 
 var SearchStep=require('booklets/components/search_step.js');
 var Squares=require('booklets/components/squares.js');
@@ -53605,6 +53615,8 @@ var Color=require('booklets/components/color.js');
 
 var ShowSquare=require('booklets/components/show_square.js');
 var Email=require('booklets/components/email.js');
+var SaveButton=require('booklets/components/save_button.js');
+var Loader=require('booklets/components/loader.js');
 
 const BOOKLET_STORAGE_KEY='@booklets:booklet_id';var 
 
@@ -53622,14 +53634,18 @@ React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.V
 var styles=StyleSheet.create({
 container:{
 flex:1,
-paddingTop:100,
+paddingTop:75,
 backgroundColor:Color.gray,
-paddingLeft:40,
-paddingRight:40}});
+paddingLeft:10,
+paddingRight:10},
+
+loader:{
+marginTop:160}});
 
 
 
 module.exports = React.createClass({displayName:'exports',
+mixins:[Subscribable.Mixin],
 getInitialState:function(){
 this.getSquares();
 this.setupReloads();
@@ -53647,6 +53663,9 @@ if(this.state.loading)return;
 
 this.setState({loading:true});
 this.getSquares();},
+
+componentDidMount:function(){var _this=this;
+this.addListenerOn(this.props.events,'rightButtonPress',function(e){return _this.clearAll();});},
 
 createBooklet:function callee$0$0(){var 
 opts,
@@ -53683,11 +53702,11 @@ opts,
 
 
 
-booklet_id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){var _this=this;while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(this.ensureBooklet());case 2:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};booklet_id = 1;
+booklet_id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){var _this2=this;while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(this.ensureBooklet());case 2:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};booklet_id = 1;
 
 fetch(Url.allSquares(),opts).then(function(resp){
 var squares=JSON.parse(resp._bodyText).squares;
-_this.setState({loading:false,squares:squares});});case 5:case 'end':return context$1$0.stop();}},null,this);},
+_this2.setState({loading:false,squares:squares});});case 5:case 'end':return context$1$0.stop();}},null,this);},
 
 
 findSquare:function(square_id){
@@ -53700,8 +53719,8 @@ this.props.navigator.push({
 title:'Search for a venue',
 component:SearchStep,
 passProps:{
-square_id:square.id,
-square_order:square.order}});},
+square:square,
+squares:this.state.squares}});},
 
 
 
@@ -53717,24 +53736,19 @@ this.event_emitter = new EventEmitter();},
 handleRightButtonPress:function(data){
 this.event_emitter.emit('rightButtonPress',{});},
 
-handleEditPress:function(square_id){
-const square=this.findSquare(square_id);
-
+handleEditPress:function(square){
 this.props.navigator.push({
 title:square.name,
 component:ShowSquare,
 rightButtonTitle:'Edit',
 onRightButtonPress:this.handleRightButtonPress,
 passProps:{
-venue_id:square.venue_id,
-square_id:square.id,
-type:'local',
-square_order:square.order,
+square:square,
 events:this.event_emitter}});},
 
 
 
-destroySquare:function(square_id){var _this2=this;
+clearAll:function(){var _this3=this;
 var opts={
 method:'POST',
 headers:{
@@ -53743,28 +53757,51 @@ headers:{
 
 
 
+this.setState({loading:true});
+fetch(Url.clearAll(),opts).then(function(resp){
+var squares=JSON.parse(resp._bodyText).squares;
+
+_this3.setState({squares:squares,loading:false});});},
+
+
+destroySquare:function(square_id){var _this4=this;
+var opts={
+method:'POST',
+headers:{
+'Accept':'application/json',
+'Content-Type':'application/json'}};
+
+
+
+this.setState({loading:true});
 fetch(Url.destroySquare(square_id),opts).then(function(resp){
 var squares=JSON.parse(resp._bodyText).squares;
 
-_this2.setState({squares:squares});});},
+_this4.setState({squares:squares,loading:false});});},
 
 
-render:function(){
-if(this.state.loading){
-var loader_or_squares=React.createElement(Text,null,'Loading');}else 
-{
-var loader_or_squares=React.createElement(Squares,{
-squares:this.state.squares,
+changableSquares:function(){
+return _.select(this.state.squares,{changable:true});},
+
+squares:function(){
+return (
+React.createElement(View,null,
+React.createElement(Squares,{
+squares:this.changableSquares(),
 addVenue:this.addVenue,
 print:this.print,
 onPress:this.handleEditPress,
-destroySquare:this.destroySquare});}
+destroySquare:this.destroySquare}),
+
+
+React.createElement(SaveButton,{onPress:this.print,text:'PRINT MY BOOKLET'})));},
 
 
 
+render:function(){
 return (
 React.createElement(View,{style:styles.container},
-loader_or_squares));}});
+this.state.loading?React.createElement(Loader,{style:styles.loader}):this.squares()));}});
 });
 __d('lodash/index.js',[],function(global, require, module, exports) {  /**
  * @license
@@ -66118,7 +66155,7 @@ root._ = _;}}).
 
 call(this);
 });
-__d('booklets/components/search_step.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/url.js","booklets/components/show_square.js","booklets/components/color.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/search_step.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/color.js","booklets/components/progress_bar.js","booklets/components/venue_search_item.js","booklets/components/category_select.js","booklets/components/loader.js","booklets/components/url.js","booklets/components/show_square.js"],function(global, require, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -66126,7 +66163,11 @@ var EventEmitter=require('EventEmitter');
 
 var Url=require('booklets/components/url.js');
 var ShowSquare=require('booklets/components/show_square.js');
-var Color=require('booklets/components/color.js');var 
+var Color=require('booklets/components/color.js');
+var ProgressBar=require('booklets/components/progress_bar.js');
+var VenueSearchItem=require('booklets/components/venue_search_item.js');
+var CategorySelect=require('booklets/components/category_select.js');
+var Loader=require('booklets/components/loader.js');var 
 
 
 ActivityIndicatorIOS=
@@ -66144,13 +66185,8 @@ container:{
 flex:1,
 paddingTop:75,
 backgroundColor:Color.gray,
-paddingLeft:40,
-paddingRight:40},
-
-progress:{
-paddingBottom:16,
-fontSize:11,
-textAlign:'center'},
+paddingLeft:10,
+paddingRight:10},
 
 question:{
 paddingBottom:10,
@@ -66165,8 +66201,7 @@ borderRadius:4,
 padding:10},
 
 loader:{
-marginTop:150,
-marginLeft:100},
+marginTop:110},
 
 venueList:{
 marginTop:15,
@@ -66205,6 +66240,7 @@ module.exports = React.createClass({displayName:'exports',
 getInitialState:function(){
 return {
 query:'',
+category:this.props.square.category,
 venues:[]};},
 
 
@@ -66230,23 +66266,25 @@ body:JSON.stringify(data)};
 
 
 fetch(Url.venuesSearch(),opts).then(function(resp){
-var venues=JSON.parse(resp._bodyText).venues;
-_this.setState({loading:false,venues:venues});});},
+var venue_squares=JSON.parse(resp._bodyText).venue_squares;
+_this.setState({loading:false,venue_squares:venue_squares});});},
 
 
 handleRightButtonPress:function(data){
 this.event_emitter.emit('rightButtonPress',{});},
 
-openVenue:function(venue_id,name){
+openVenueSquare:function(venue_square){
+venue_square.id = this.props.square.id;
+venue_square.order = this.props.square.order;
+venue_square.category = this.state.category;
+
 this.props.navigator.push({
-title:name,
+title:venue_square.name,
 component:ShowSquare,
 rightButtonTitle:'Edit',
 onRightButtonPress:this.handleRightButtonPress,
 passProps:{
-venue_id:venue_id,
-square_id:this.props.square_id,
-square_order:this.props.square_order,
+square:venue_square,
 events:this.event_emitter}});},
 
 
@@ -66258,35 +66296,22 @@ var questions=[
 'What is your favorite bar?'];
 
 
-var question_no=this.props.step;
-if(question_no > questions.length)question_no = questions.length;
 
-return questions[question_no - 1];},
+
+
+return questions[1];},
+
+changeCategory:function(new_category){
+this.setState({category:new_category});},
 
 render:function(){var _this2=this;
 if(this.state.loading){
-var bottom_part=React.createElement(ActivityIndicatorIOS,{style:styles.loader,animating:true,size:'large',color:Color.dark_gray});}else 
+var bottom_part=React.createElement(Loader,{style:styles.loader});}else 
 {
 var bottom_part=React.createElement(View,{style:styles.venueList},
-_.map(this.state.venues,function(venue){
+_.map(this.state.venue_squares,function(venue_square){
 return (
-React.createElement(TouchableHighlight,{key:venue.id,onPress:function(e){_this2.openVenue(venue.id,venue.name);}},
-React.createElement(View,{style:styles.venueItem},
-React.createElement(Image,{
-style:styles.venuePhoto,
-source:{uri:venue.photo_urls[0]}},
-
-React.createElement(View,{style:styles.insideVenuePhoto},
-React.createElement(Text,{style:styles.venueName},
-venue.name),
-
-React.createElement(Text,{style:styles.venueAddress},
-venue.address))))));}));}
-
-
-
-
-
+React.createElement(VenueSearchItem,_extends({},venue_square,{onPress:function(e){return _this2.openVenueSquare(venue_square);}})));}));}
 
 
 
@@ -66294,12 +66319,8 @@ venue.address))))));}));}
 
 return (
 React.createElement(ScrollView,{style:styles.container,automaticallyAdjustContentInsets:false},
-React.createElement(Text,{style:styles.progress},'STEP ',
-this.props.square_order,' OF 12'),
-
-React.createElement(Text,{style:styles.question},
-this.question()),
-
+React.createElement(ProgressBar,{squares:this.props.squares}),
+React.createElement(CategorySelect,{category:this.state.category,onChange:this.changeCategory}),
 React.createElement(TextInput,{
 style:styles.answer,
 onChangeText:this.changeQuery,
@@ -66342,13 +66363,17 @@ return this.serverUrl() + '/squares/update/' + square_id;}},{key:'destroySquare'
 
 
 function destroySquare(square_id){
-return this.serverUrl() + '/squares/destroy/' + square_id;}},{key:'print',value:
+return this.serverUrl() + '/squares/destroy/' + square_id;}},{key:'clearAll',value:
+
+
+function clearAll(){
+return this.serverUrl() + '/squares/' + this.booklet_id + '/clear_all';}},{key:'print',value:
 
 
 function print(){
 return this.serverUrl() + '/booklets/' + this.booklet_id + '/print';}}]);return Url;})();
 });
-__d('booklets/components/show_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js","booklets/components/save_button.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/show_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/save_button.js","booklets/components/venue_detail.js","booklets/components/text_detail.js","booklets/components/cover_detail.js"],function(global, require, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -66356,9 +66381,10 @@ var Subscribable=require('Subscribable');
 
 var Url=require('booklets/components/url.js');
 var Color=require('booklets/components/color.js');
-var SquareInfoBox=require('booklets/components/square_info_box.js');
-var SquareNameBox=require('booklets/components/square_name_box.js');
-var SaveButton=require('booklets/components/save_button.js');var 
+var SaveButton=require('booklets/components/save_button.js');
+var VenueDetail=require('booklets/components/venue_detail.js');
+var TextDetail=require('booklets/components/text_detail.js');
+var CoverDetail=require('booklets/components/cover_detail.js');var 
 
 
 StyleSheet=
@@ -66377,19 +66403,181 @@ paddingTop:85,
 backgroundColor:Color.gray,
 paddingLeft:20,
 paddingRight:20,
-paddingBottom:20},
+paddingBottom:220},
 
 progress:{
 paddingBottom:16,
 fontSize:11,
-textAlign:'center'},
+textAlign:'center'}});
 
+
+
+module.exports = React.createClass({displayName:'exports',
+mixins:[Subscribable.Mixin],
+getInitialState:function(){
+return {
+editing:false,
+name:this.props.square.name,
+address:this.props.square.address,
+description:this.props.square.description,
+phone:this.props.square.phone,
+website:this.props.square.website,
+photo_url:this.props.square.photo_url};},
+
+
+componentDidMount:function(){var _this=this;
+this.addListenerOn(this.props.events,'rightButtonPress',function(e){return _this.startEditing();});},
+
+changeDescription:function(description){
+this.setState({description:description});},
+
+save:function(){var _this2=this;
+this.execSave().then(function(resp){
+_this2.props.navigator.popToTop();});},
+
+
+saveData:function(){
+return {
+venue_id:this.props.square.venue_id,
+description:this.state.description,
+name:this.state.name,
+address:this.state.address,
+phone:this.state.phone,
+website:this.state.website,
+photo_url:this.state.photo_url};},
+
+
+execSave:function(){
+var opts={
+method:'POST',
+headers:{
+'Accept':'application/json',
+'Content-Type':'application/json'},
+
+body:JSON.stringify(this.saveData())};
+
+
+var booklet_id=1;
+return fetch(Url.updateSquare(this.props.square.id),opts);},
+
+change:function(type){var _this3=this;
+return function(value){
+var new_state=_this3.state;
+new_state[type] = value;
+_this3.setState(new_state);};},
+
+
+startEditing:function(){
+this.setState({editing:true});},
+
+image:function(){
+if(!this.state.photo_url)return false;
+
+return (
+React.createElement(Image,{
+style:styles.venuePhoto,
+source:{uri:this.state.photo_url}}));},
+
+
+
+detail:function(){
+var Component=VenueDetail;
+
+if(this.props.square.category == 'text'){
+Component = TextDetail;}else 
+if(this.props.square.category == 'cover'){
+Component = CoverDetail;}
+
+
+return React.createElement(Component,_extends({},this.state,{onChange:this.change}));},
+
+render:function(){
+return (
+React.createElement(ScrollView,{
+style:styles.container,
+ref:'scrollView',
+keyboardDismissMode:'on-drag',
+automaticallyAdjustContentInsets:false,
+keyboardShouldPersistTaps:false},
+
+this.detail(),
+
+React.createElement(SaveButton,{text:'Save',onPress:this.save})));}});
+});
+__d('booklets/components/color.js',[],function(global, require, module, exports) {  module.exports = {
+gray:'#F9F9FB',
+dark_gray:'#B4BCCC',
+white:'#fff',
+red:'#FF3266',
+black:'#474F6E',
+light_blue:'#E5EAF4',
+transparent_red:'hsla(345, 100%, 60%, .1)'};
+});
+__d('booklets/components/save_button.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var SearchStep=require('booklets/components/search_step.js');
+var Color=require('booklets/components/color.js');var 
+
+
+Image=
+
+
+
+
+React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.View;var TouchableHighlight=React.TouchableHighlight;
+
+var styles=StyleSheet.create({
+button:{
+backgroundColor:Color.transparent_red,
+borderColor:Color.red,
+borderWidth:1,
+padding:15,
+flex:1,
+marginLeft:5,
+marginRight:5,
+borderRadius:5},
+
+text:{
+textAlign:'center',
+fontSize:13,
+color:Color.red}});
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){
+return (
+React.createElement(View,null,
+React.createElement(TouchableHighlight,{style:styles.button,onPress:this.props.onPress},
+React.createElement(Text,{style:styles.text},
+this.props.text))));}});
+});
+__d('booklets/components/venue_detail.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
 venuePhoto:{
 height:150},
 
 venueCard:{
-backgroundColor:Color.white,
-paddingBottom:200},
+backgroundColor:Color.white},
 
 venueInfo:{
 padding:20,
@@ -66421,93 +66609,31 @@ fontSize:14}});
 
 
 module.exports = React.createClass({displayName:'exports',
-mixins:[Subscribable.Mixin],
-getInitialState:function(){
-this.load();
+focus:function(type){var _this=this;
+setTimeout(function(e){
+var scrollResponder=_this.props.scrollView.getScrollResponder();
+scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
+React.findNodeHandle(_this.refs[type]),
+110,
+true);},
 
-return {
-editing:false};},
-
-
-componentDidMount:function(){var _this=this;
-this.addListenerOn(this.props.events,'rightButtonPress',function(e){return _this.startEditing();});},
-
-changeDescription:function(description){
-this.setState({description:description});},
-
-save:function(){var _this2=this;
-this.execSave().then(function(resp){
-_this2.props.navigator.popToTop();});},
-
-
-saveData:function(){
-return {
-venue_id:this.props.venue_id,
-order:this.props.step,
-description:this.state.description,
-name:this.state.name,
-address:this.state.address,
-phone:this.state.phone,
-website:this.state.website};},
-
-
-execSave:function(){
-var opts={
-method:'POST',
-headers:{
-'Accept':'application/json',
-'Content-Type':'application/json'},
-
-body:JSON.stringify(this.saveData())};
-
-
-var booklet_id=1;
-return fetch(Url.updateSquare(this.props.square_id),opts);},
-
-load:function(){var _this3=this;
-var opts={
-method:'GET'};
-
-
-fetch(Url.findSquare(this.props.square_id,this.props.venue_id),opts).then(function(resp){
-var square=JSON.parse(resp._bodyText).square;
-
-_this3.setState({
-name:square.name,
-address:square.address,
-phone:square.phone,
-photo_url:square.photo_url,
-photo_urls:square.photo_urls,
-website:square.website,
-description:square.description});});},
-
-
-
-change:function(type){var _this4=this;
-return function(value){
-var new_state=_this4.state;
-new_state[type] = value;
-_this4.setState(new_state);};},
-
-
-startEditing:function(){
-this.setState({editing:true});},
+50);},
 
 image:function(){
-if(!this.state.photo_url)return false;
+if(!this.props.photo_url)return false;
 
 return (
 React.createElement(Image,{
 style:styles.venuePhoto,
-source:{uri:this.state.photo_url}}));},
+source:{uri:this.props.photo_url}}));},
 
 
 
-handleFocus:function(type){var _this5=this;
+handleFocus:function(type){var _this2=this;
 setTimeout(function(e){
-var scrollResponder=_this5.refs.scrollView.getScrollResponder();
+var scrollResponder=_this2.refs.scrollView.getScrollResponder();
 scrollResponder.scrollResponderScrollNativeHandleToKeyboard(
-React.findNodeHandle(_this5.refs[type]),
+React.findNodeHandle(_this2.refs[type]),
 110,
 true);},
 
@@ -66515,56 +66641,42 @@ true);},
 
 render:function(){
 return (
-React.createElement(ScrollView,{style:styles.container,ref:'scrollView',keyboardDismissMode:'on-drag',keyboardShouldPersistTaps:false},
 React.createElement(View,{style:styles.venueCard},
 this.image(),
 
 React.createElement(View,{style:styles.venueInfo},
 React.createElement(SquareNameBox,{
-value:this.state.name,
-onChange:this.change('name'),
-editing:this.state.editing}),
+value:this.props.name,
+onChange:this.props.onChange('name'),
+editing:this.props.editing}),
 
 
 React.createElement(SquareInfoBox,{
 label:'ADDRESS',
-value:this.state.address,
-onChange:this.change('address'),
-editing:this.state.editing}),
+value:this.props.address,
+onChange:this.props.onChange('address'),
+editing:this.props.editing}),
 
 React.createElement(SquareInfoBox,{
 label:'PHONE',
-value:this.state.phone,
-onChange:this.change('phone'),
-editing:this.state.editing}),
+value:this.props.phone,
+onChange:this.props.onChange('phone'),
+editing:this.props.editing}),
 
 React.createElement(SquareInfoBox,{
 label:'WEBSITE',
-value:this.state.website,
-onChange:this.change('website'),
-editing:this.state.editing})),
+value:this.props.website,
+onChange:this.props.onChange('website'),
+editing:this.props.editing})),
 
 
 
 React.createElement(TextInput,{
 style:styles.description,
 placeholder:'Tips and tricks for your guests here.',
-onChangeText:this.changeDescription,
-value:this.state.description,
-ref:'description',
-onFocus:this.handleFocus('description'),
-multiline:true}),
-
-
-React.createElement(SaveButton,{text:'Save',onPress:this.save}))));}});
-});
-__d('booklets/components/color.js',[],function(global, require, module, exports) {  module.exports = {
-gray:'#F9F9FB',
-dark_gray:'#B4BCCC',
-white:'#fff',
-red:'#FF3266',
-black:'#474F6E',
-light_blue:'#E5EAF4'};
+onChangeText:this.props.onChange('description'),
+value:this.props.description,
+multiline:true})));}});
 });
 __d('booklets/components/square_info_box.js',["react-native/Libraries/react-native/react-native.js","booklets/components/color.js"],function(global, require, module, exports) {  'use strict';
 
@@ -66674,7 +66786,7 @@ value:this.props.value}));},
 
 name:function(){
 return (
-React.createElement(Text,{style:styles.venueName},
+React.createElement(Text,{style:[styles.venueName,this.props.style]},
 this.props.value));},
 
 
@@ -66682,11 +66794,2052 @@ this.props.value));},
 render:function(){
 return this.props.editing?this.editingBox():this.name();}});
 });
-__d('booklets/components/save_button.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+__d('booklets/components/text_detail.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
 
-var SearchStep=require('booklets/components/search_step.js');
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+venueCard:{
+backgroundColor:Color.white},
+
+description:{
+height:300,
+borderColor:Color.light_blue,
+backgroundColor:Color.white,
+borderWidth:1,
+borderRadius:4,
+padding:10,
+margin:20,
+marginTop:40,
+fontSize:14}});
+
+
+
+module.exports = React.createClass({displayName:'exports',
+
+
+
+
+
+
+
+
+
+
+image:function(){
+if(!this.props.photo_url)return false;
+
+return (
+React.createElement(Image,{
+style:styles.venuePhoto,
+source:{uri:this.props.photo_url}}));},
+
+
+
+
+
+
+
+
+
+
+
+
+
+render:function(){
+return (
+React.createElement(View,{style:styles.venueCard},
+React.createElement(TextInput,{
+style:styles.description,
+placeholder:'Tips and tricks for your guests here.',
+onChangeText:this.props.onChange('description'),
+value:this.props.description,
+multiline:true})));}});
+});
+__d('booklets/components/cover_detail.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+name:{
+paddingTop:20},
+
+city:{
+paddingTop:10,
+paddingBottom:20},
+
+venuePhoto:{
+height:150,
+width:150,
+borderRadius:75},
+
+venueCard:{
+backgroundColor:Color.white,
+alignItems:'center',
+marginBottom:50}});
+
+
+
+module.exports = React.createClass({displayName:'exports',
+image:function(){
+if(!this.props.photo_url)return false;
+
+return (
+React.createElement(Image,{
+style:styles.venuePhoto,
+source:{uri:this.props.photo_url}}));},
+
+
+
+render:function(){
+return (
+React.createElement(View,{style:styles.venueCard},
+this.image(),
+
+React.createElement(SquareNameBox,{
+style:styles.name,
+value:this.props.name,
+onChange:this.props.onChange('name'),
+editing:this.props.editing}),
+
+
+React.createElement(Text,{style:styles.city},'Stockholm, Sweden')));}});
+});
+__d('booklets/components/progress_bar.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
 var Color=require('booklets/components/color.js');var 
+
+
+StyleSheet=
+
+
+React.StyleSheet;var Text=React.Text;var View=React.View;
+
+var ProgressBar=React.createClass({displayName:'ProgressBar',
+complete:function(){
+const total=this.props.squares.length;
+
+const squares_count=_.countBy(this.props.squares,{empty:false});
+const filled=squares_count.true || 0;
+
+return (filled + 1) / (total + 1) * 100;},
+
+incomplete:function(){
+return Math.abs(this.complete() - 100);},
+
+render:function(){
+return (
+React.createElement(View,{style:[styles.container]},
+React.createElement(View,{style:[styles.complete,{flex:this.complete()}]}),
+React.createElement(View,{style:[styles.incomplete,{flex:this.incomplete()}]})));}});
+
+
+
+
+
+
+var radius=4;
+var styles=StyleSheet.create({
+container:{
+flexDirection:'row',
+height:10,
+borderRadius:radius,
+marginBottom:10,
+paddingLeft:5,
+paddingRight:5},
+
+
+complete:{
+backgroundColor:Color.red,
+borderTopLeftRadius:radius,
+borderBottomLeftRadius:radius},
+
+
+incomplete:{
+backgroundColor:Color.white,
+borderTopRightRadius:radius,
+borderBottomRightRadius:radius}});
+
+
+
+module.exports = ProgressBar;
+});
+__d('booklets/components/venue_search_item.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/color.js","booklets/components/progress_bar.js","booklets/components/url.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+var EventEmitter=require('EventEmitter');
+
+var Url=require('booklets/components/url.js');
+var Color=require('booklets/components/color.js');
+var ProgressBar=require('booklets/components/progress_bar.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+venueItem:{
+backgroundColor:Color.white,
+height:100,
+marginBottom:15,
+borderRadius:2},
+
+venuePhoto:{
+height:100},
+
+venueName:{
+textAlign:'center',
+color:Color.white,
+paddingBottom:5,
+fontSize:16},
+
+venueAddress:{
+textAlign:'center',
+color:Color.white,
+fontSize:12},
+
+insideVenuePhoto:{
+padding:20,
+paddingTop:30,
+height:100,
+backgroundColor:'hsla(0, 0%, 0%, .7)',
+borderRadius:2}});
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){
+return (
+React.createElement(TouchableHighlight,{onPress:this.props.onPress},
+React.createElement(View,{style:styles.venueItem},
+React.createElement(Image,{
+style:styles.venuePhoto,
+source:{uri:this.props.photo_url}},
+
+React.createElement(View,{style:styles.insideVenuePhoto},
+React.createElement(Text,{style:styles.venueName},
+this.props.name),
+
+React.createElement(Text,{style:styles.venueAddress},
+this.props.address))))));}});
+});
+__d('booklets/components/category_select.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","MaterialIcons","booklets/components/color.js","react-native-swiper/dist/index.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+var Icon=require('MaterialIcons');
+
+var Color=require('booklets/components/color.js');
+var Swiper=require('react-native-swiper/dist/index.js');var 
+
+
+Image=
+
+
+
+
+React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.View;var TouchableHighlight=React.TouchableHighlight;
+
+var styles=StyleSheet.create({
+wrapper:{
+paddingBottom:20},
+
+option:{
+flex:1,
+paddingTop:10,
+justifyContent:'center',
+alignItems:'center'},
+
+button:{
+color:Color.dark_gray,
+fontSize:35},
+
+icon:{
+color:Color.dark_gray}});
+
+
+
+const ICON_CATEGORY_MAPPINGS={
+cafe:'local-cafe',
+food:'local-dining',
+nightlife:'local-bar',
+outdoors:'terrain',
+shop:'local-grocery-store',
+camping:'terrain',
+accomodation:'local-hotel',
+sports:'directions-run',
+text:'text-format'};
+
+
+const CATEGORIES=[
+'cafe',
+'food',
+'nightlife',
+'outdoors',
+'shop',
+'camping',
+'accomodation',
+'sports',
+'text'];
+
+
+module.exports = React.createClass({displayName:'exports',
+nextButton:function(){
+return (
+React.createElement(Text,{style:styles.button},'›'));},
+
+
+prevButton:function(){
+return (
+React.createElement(Text,{style:styles.button},'‹'));},
+
+
+icon:function(category){
+return ICON_CATEGORY_MAPPINGS[category];},
+
+question:function(category){
+return 'What is your favorite ' + category + '?';},
+
+initial:function(){
+return _.indexOf(CATEGORIES,this.props.category);},
+
+componentDidMount:function(){
+this.refs.swiper.scrollTo(this.initial());},
+
+change:function(state){
+this.props.onChange(CATEGORIES[state.index]);},
+
+render:function(){var _this=this;
+return (
+React.createElement(View,{style:styles.wrapper},
+React.createElement(Swiper,{
+showsButtons:true,
+width:300,
+height:60,
+showsPagination:false,
+nextButton:this.nextButton(),
+prevButton:this.prevButton(),
+ref:'swiper',
+onMomentumScrollEnd:function(e,state){return _this.change(state);}},
+
+_.map(CATEGORIES,function(category){
+return (
+React.createElement(View,{style:styles.option,key:category},
+React.createElement(Icon,{style:styles.icon,name:_this.icon(category),size:30}),
+React.createElement(Text,null,_this.question(category))));}))));}});
+});
+__d('MaterialIcons',["createIconSet"],function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+var createIconSet=require('createIconSet');
+var glyphMap={
+"3d-rotation":61696,
+"access-alarm":61697,
+"access-alarms":61698,
+"access-time":61699,
+"accessibility":61700,
+"account-balance":61701,
+"account-balance-wallet":61702,
+"account-box":61703,
+"account-circle":61704,
+"adb":61705,
+"add":61706,
+"add-alarm":61707,
+"add-alert":61708,
+"add-box":61709,
+"add-circle":61710,
+"add-circle-outline":61711,
+"add-shopping-cart":61712,
+"add-to-photos":61713,
+"adjust":61714,
+"airline-seat-flat":61715,
+"airline-seat-flat-angled":61716,
+"airline-seat-individual-suite":61717,
+"airline-seat-legroom-extra":61718,
+"airline-seat-legroom-normal":61719,
+"airline-seat-legroom-reduced":61720,
+"airline-seat-recline-extra":61721,
+"airline-seat-recline-normal":61722,
+"airplanemode-active":61723,
+"airplanemode-inactive":61724,
+"airplay":61725,
+"alarm":61726,
+"alarm-add":61727,
+"alarm-off":61728,
+"alarm-on":61729,
+"album":61730,
+"android":61731,
+"announcement":61732,
+"apps":61733,
+"archive":61734,
+"arrow-back":61735,
+"arrow-drop-down":61736,
+"arrow-drop-down-circle":61737,
+"arrow-drop-up":61738,
+"arrow-forward":61739,
+"aspect-ratio":61740,
+"assessment":61741,
+"assignment":61742,
+"assignment-ind":61743,
+"assignment-late":61744,
+"assignment-return":61745,
+"assignment-returned":61746,
+"assignment-turned-in":61747,
+"assistant":61748,
+"assistant-photo":61749,
+"attach-file":61750,
+"attach-money":61751,
+"attachment":61752,
+"audiotrack":61753,
+"autorenew":61754,
+"av-timer":61755,
+"backspace":61756,
+"backup":61757,
+"battery-20":61758,
+"battery-30":61759,
+"battery-50":61760,
+"battery-60":61761,
+"battery-80":61762,
+"battery-90":61763,
+"battery-alert":61764,
+"battery-charging-20":61765,
+"battery-charging-30":61766,
+"battery-charging-50":61767,
+"battery-charging-60":61768,
+"battery-charging-80":61769,
+"battery-charging-90":61770,
+"battery-charging-full":61771,
+"battery-full":61772,
+"battery-std":61773,
+"battery-unknown":61774,
+"beenhere":61775,
+"block":61776,
+"bluetooth":61777,
+"bluetooth-audio":61778,
+"bluetooth-connected":61779,
+"bluetooth-disabled":61780,
+"bluetooth-searching":61781,
+"blur-circular":61782,
+"blur-linear":61783,
+"blur-off":61784,
+"blur-on":61785,
+"book":61786,
+"bookmark":61787,
+"bookmark-border":61788,
+"border-all":61789,
+"border-bottom":61790,
+"border-clear":61791,
+"border-color":61792,
+"border-horizontal":61793,
+"border-inner":61794,
+"border-left":61795,
+"border-outer":61796,
+"border-right":61797,
+"border-style":61798,
+"border-top":61799,
+"border-vertical":61800,
+"brightness-1":61801,
+"brightness-2":61802,
+"brightness-3":61803,
+"brightness-4":61804,
+"brightness-5":61805,
+"brightness-6":61806,
+"brightness-7":61807,
+"brightness-auto":61808,
+"brightness-high":61809,
+"brightness-low":61810,
+"brightness-medium":61811,
+"broken-image":61812,
+"brush":61813,
+"bug-report":61814,
+"build":61815,
+"business":61816,
+"cached":61817,
+"cake":61818,
+"call":61819,
+"call-end":61820,
+"call-made":61821,
+"call-merge":61822,
+"call-missed":61823,
+"call-received":61824,
+"call-split":61825,
+"camera":61826,
+"camera-alt":61827,
+"camera-front":61828,
+"camera-rear":61829,
+"camera-roll":61830,
+"cancel":61831,
+"card-giftcard":61832,
+"card-membership":61833,
+"card-travel":61834,
+"cast":61835,
+"cast-connected":61836,
+"center-focus-strong":61837,
+"center-focus-weak":61838,
+"change-history":61839,
+"chat":61840,
+"chat-bubble":61841,
+"chat-bubble-outline":61842,
+"check":61843,
+"check-box":61844,
+"check-box-outline-blank":61845,
+"check-circle":61846,
+"chevron-left":61847,
+"chevron-right":61848,
+"chrome-reader-mode":61849,
+"class":61850,
+"clear":61851,
+"clear-all":61852,
+"close":61853,
+"closed-caption":61854,
+"cloud":61855,
+"cloud-circle":61856,
+"cloud-done":61857,
+"cloud-download":61858,
+"cloud-off":61859,
+"cloud-queue":61860,
+"cloud-upload":61861,
+"code":61862,
+"collections":61863,
+"color-lens":61864,
+"colorize":61865,
+"comment":61866,
+"compare":61867,
+"computer":61868,
+"confirmation-number":61869,
+"contact-phone":61870,
+"contacts":61871,
+"content-copy":61872,
+"content-cut":61873,
+"content-paste":61874,
+"control-point":61875,
+"control-point-duplicate":61876,
+"create":61877,
+"credit-card":61878,
+"crop":61879,
+"crop-16-9":61880,
+"crop-3-2":61881,
+"crop-5-4":61882,
+"crop-7-5":61883,
+"crop-din":61884,
+"crop-free":61885,
+"crop-landscape":61886,
+"crop-original":61887,
+"crop-portrait":61888,
+"crop-square":61889,
+"dashboard":61890,
+"data-usage":61891,
+"dehaze":61892,
+"delete":61893,
+"description":61894,
+"desktop-mac":61895,
+"desktop-windows":61896,
+"details":61897,
+"developer-board":61898,
+"developer-mode":61899,
+"devices":61900,
+"dialer-sip":61901,
+"dialpad":61902,
+"directions":61903,
+"directions-bike":61904,
+"directions-boat":61905,
+"directions-bus":61906,
+"directions-car":61907,
+"directions-railway":61908,
+"directions-run":61909,
+"directions-subway":61910,
+"directions-transit":61911,
+"directions-walk":61912,
+"disc-full":61913,
+"dns":61914,
+"do-not-disturb":61915,
+"do-not-disturb-alt":61916,
+"dock":61917,
+"domain":61918,
+"done":61919,
+"done-all":61920,
+"drafts":61921,
+"drive-eta":61922,
+"dvr":61923,
+"edit":61924,
+"email":61925,
+"equalizer":61926,
+"error":61927,
+"error-outline":61928,
+"event":61929,
+"event-available":61930,
+"event-busy":61931,
+"event-note":61932,
+"event-seat":61933,
+"exit-to-app":61934,
+"expand-less":61935,
+"expand-more":61936,
+"explicit":61937,
+"explore":61938,
+"exposure":61939,
+"exposure-neg-1":61940,
+"exposure-neg-2":61941,
+"exposure-plus-1":61942,
+"exposure-plus-2":61943,
+"exposure-zero":61944,
+"extension":61945,
+"face":61946,
+"fast-forward":61947,
+"fast-rewind":61948,
+"favorite":61949,
+"favorite-border":61950,
+"feedback":61951,
+"file-download":61952,
+"file-upload":61953,
+"filter":61954,
+"filter-1":61955,
+"filter-2":61956,
+"filter-3":61957,
+"filter-4":61958,
+"filter-5":61959,
+"filter-6":61960,
+"filter-7":61961,
+"filter-8":61962,
+"filter-9":61963,
+"filter-9-plus":61964,
+"filter-b-and-w":61965,
+"filter-center-focus":61966,
+"filter-drama":61967,
+"filter-frames":61968,
+"filter-hdr":61969,
+"filter-list":61970,
+"filter-none":61971,
+"filter-tilt-shift":61972,
+"filter-vintage":61973,
+"find-in-page":61974,
+"find-replace":61975,
+"flag":61976,
+"flare":61977,
+"flash-auto":61978,
+"flash-off":61979,
+"flash-on":61980,
+"flight":61981,
+"flight-land":61982,
+"flight-takeoff":61983,
+"flip":61984,
+"flip-to-back":61985,
+"flip-to-front":61986,
+"folder":61987,
+"folder-open":61988,
+"folder-shared":61989,
+"folder-special":61990,
+"format-align-center":61991,
+"format-align-justify":61992,
+"format-align-left":61993,
+"format-align-right":61994,
+"format-bold":61995,
+"format-clear":61996,
+"format-color-fill":61997,
+"format-color-reset":61998,
+"format-color-text":61999,
+"format-indent-decrease":62000,
+"format-indent-increase":62001,
+"format-italic":62002,
+"format-line-spacing":62003,
+"format-list-bulleted":62004,
+"format-list-numbered":62005,
+"format-paint":62006,
+"format-quote":62007,
+"format-size":62008,
+"format-strikethrough":62009,
+"format-textdirection-l-to-r":62010,
+"format-textdirection-r-to-l":62011,
+"format-underlined":62012,
+"forum":62013,
+"forward":62014,
+"forward-10":62015,
+"forward-30":62016,
+"forward-5":62017,
+"fullscreen":62018,
+"fullscreen-exit":62019,
+"functions":62020,
+"gamepad":62021,
+"games":62022,
+"gesture":62023,
+"get-app":62024,
+"gps-fixed":62025,
+"gps-not-fixed":62026,
+"gps-off":62027,
+"grade":62028,
+"gradient":62029,
+"grain":62030,
+"graphic-eq":62031,
+"grid-off":62032,
+"grid-on":62033,
+"group":62034,
+"group-add":62035,
+"group-work":62036,
+"hdr-off":62037,
+"hdr-on":62038,
+"hdr-strong":62039,
+"hdr-weak":62040,
+"headset":62041,
+"headset-mic":62042,
+"healing":62043,
+"hearing":62044,
+"help":62045,
+"high-quality":62046,
+"highlight-off":62047,
+"history":62048,
+"home":62049,
+"hotel":62050,
+"hourglass-empty":62051,
+"hourglass-full":62052,
+"http":62053,
+"https":62054,
+"image":62055,
+"image-aspect-ratio":62056,
+"import-export":62057,
+"inbox":62058,
+"info":62059,
+"info-outline":62060,
+"input":62061,
+"insert-chart":62062,
+"insert-comment":62063,
+"insert-drive-file":62064,
+"insert-emoticon":62065,
+"insert-invitation":62066,
+"insert-link":62067,
+"insert-photo":62068,
+"invert-colors":62069,
+"invert-colors-off":62070,
+"iso":62071,
+"keyboard":62072,
+"keyboard-arrow-down":62073,
+"keyboard-arrow-left":62074,
+"keyboard-arrow-right":62075,
+"keyboard-arrow-up":62076,
+"keyboard-backspace":62077,
+"keyboard-capslock":62078,
+"keyboard-hide":62079,
+"keyboard-return":62080,
+"keyboard-tab":62081,
+"keyboard-voice":62082,
+"label":62083,
+"label-outline":62084,
+"landscape":62085,
+"language":62086,
+"laptop":62087,
+"laptop-chromebook":62088,
+"laptop-mac":62089,
+"laptop-windows":62090,
+"launch":62091,
+"layers":62092,
+"layers-clear":62093,
+"leak-add":62094,
+"leak-remove":62095,
+"lens":62096,
+"library-add":62097,
+"library-books":62098,
+"library-music":62099,
+"link":62100,
+"list":62101,
+"live-help":62102,
+"live-tv":62103,
+"local-activity":62104,
+"local-airport":62105,
+"local-atm":62106,
+"local-bar":62107,
+"local-cafe":62108,
+"local-car-wash":62109,
+"local-convenience-store":62110,
+"local-dining":62111,
+"local-drink":62112,
+"local-florist":62113,
+"local-gas-station":62114,
+"local-grocery-store":62115,
+"local-hospital":62116,
+"local-hotel":62117,
+"local-laundry-service":62118,
+"local-library":62119,
+"local-mall":62120,
+"local-movies":62121,
+"local-offer":62122,
+"local-parking":62123,
+"local-pharmacy":62124,
+"local-phone":62125,
+"local-pizza":62126,
+"local-play":62127,
+"local-post-office":62128,
+"local-printshop":62129,
+"local-see":62130,
+"local-shipping":62131,
+"local-taxi":62132,
+"location-city":62133,
+"location-disabled":62134,
+"location-off":62135,
+"location-on":62136,
+"location-searching":62137,
+"lock":62138,
+"lock-open":62139,
+"lock-outline":62140,
+"looks":62141,
+"looks-3":62142,
+"looks-4":62143,
+"looks-5":62144,
+"looks-6":62145,
+"looks-one":62146,
+"looks-two":62147,
+"loop":62148,
+"loupe":62149,
+"loyalty":62150,
+"mail":62151,
+"map":62152,
+"markunread":62153,
+"markunread-mailbox":62154,
+"memory":62155,
+"menu":62156,
+"merge-type":62157,
+"message":62158,
+"mic":62159,
+"mic-none":62160,
+"mic-off":62161,
+"mms":62162,
+"mode-comment":62163,
+"mode-edit":62164,
+"monochrome-photos":62165,
+"mood":62166,
+"mood-bad":62167,
+"more":62168,
+"more-horiz":62169,
+"more-vert":62170,
+"mouse":62171,
+"movie":62172,
+"movie-creation":62173,
+"music-note":62174,
+"my-location":62175,
+"nature":62176,
+"nature-people":62177,
+"navigate-before":62178,
+"navigate-next":62179,
+"navigation":62180,
+"network-cell":62181,
+"network-locked":62182,
+"network-wifi":62183,
+"new-releases":62184,
+"nfc":62185,
+"no-sim":62186,
+"not-interested":62187,
+"note-add":62188,
+"notifications":62189,
+"notifications-active":62190,
+"notifications-none":62191,
+"notifications-off":62192,
+"notifications-paused":62193,
+"ondemand-video":62194,
+"open-in-browser":62195,
+"open-in-new":62196,
+"open-with":62197,
+"pages":62198,
+"pageview":62199,
+"palette":62200,
+"panorama":62201,
+"panorama-fish-eye":62202,
+"panorama-horizontal":62203,
+"panorama-vertical":62204,
+"panorama-wide-angle":62205,
+"party-mode":62206,
+"pause":62207,
+"pause-circle-filled":62208,
+"pause-circle-outline":62209,
+"payment":62210,
+"people":62211,
+"people-outline":62212,
+"perm-camera-mic":62213,
+"perm-contact-calendar":62214,
+"perm-data-setting":62215,
+"perm-device-information":62216,
+"perm-identity":62217,
+"perm-media":62218,
+"perm-phone-msg":62219,
+"perm-scan-wifi":62220,
+"person":62221,
+"person-add":62222,
+"person-outline":62223,
+"person-pin":62224,
+"personal-video":62225,
+"phone":62226,
+"phone-android":62227,
+"phone-bluetooth-speaker":62228,
+"phone-forwarded":62229,
+"phone-in-talk":62230,
+"phone-iphone":62231,
+"phone-locked":62232,
+"phone-missed":62233,
+"phone-paused":62234,
+"phonelink":62235,
+"phonelink-off":62236,
+"photo":62237,
+"photo-album":62238,
+"photo-camera":62239,
+"photo-library":62240,
+"picture-as-pdf":62241,
+"picture-in-picture":62242,
+"pin-drop":62243,
+"place":62244,
+"play-arrow":62245,
+"play-circle-filled":62246,
+"play-circle-outline":62247,
+"play-for-work":62248,
+"playlist-add":62249,
+"plus-one":62250,
+"poll":62251,
+"polymer":62252,
+"portable-wifi-off":62253,
+"portrait":62254,
+"power":62255,
+"power-input":62256,
+"power-settings-new":62257,
+"present-to-all":62258,
+"print":62259,
+"public":62260,
+"publish":62261,
+"query-builder":62262,
+"question-answer":62263,
+"queue":62264,
+"queue-music":62265,
+"radio":62266,
+"radio-button-checked":62267,
+"radio-button-unchecked":62268,
+"rate-review":62269,
+"receipt":62270,
+"recent-actors":62271,
+"redeem":62272,
+"redo":62273,
+"refresh":62274,
+"remove":62275,
+"remove-circle":62276,
+"remove-circle-outline":62277,
+"remove-red-eye":62278,
+"repeat":62279,
+"repeat-one":62280,
+"replay":62281,
+"replay-10":62282,
+"replay-30":62283,
+"replay-5":62284,
+"reply":62285,
+"reply-all":62286,
+"report":62287,
+"report-problem":62288,
+"restaurant-menu":62289,
+"restore":62290,
+"ring-volume":62291,
+"room":62292,
+"rotate-90-degrees-ccw":62293,
+"rotate-left":62294,
+"rotate-right":62295,
+"router":62296,
+"satellite":62297,
+"save":62298,
+"scanner":62299,
+"schedule":62300,
+"school":62301,
+"screen-lock-landscape":62302,
+"screen-lock-portrait":62303,
+"screen-lock-rotation":62304,
+"screen-rotation":62305,
+"sd-card":62306,
+"sd-storage":62307,
+"search":62308,
+"security":62309,
+"select-all":62310,
+"send":62311,
+"settings":62312,
+"settings-applications":62313,
+"settings-backup-restore":62314,
+"settings-bluetooth":62315,
+"settings-brightness":62316,
+"settings-cell":62317,
+"settings-ethernet":62318,
+"settings-input-antenna":62319,
+"settings-input-component":62320,
+"settings-input-composite":62321,
+"settings-input-hdmi":62322,
+"settings-input-svideo":62323,
+"settings-overscan":62324,
+"settings-phone":62325,
+"settings-power":62326,
+"settings-remote":62327,
+"settings-system-daydream":62328,
+"settings-voice":62329,
+"share":62330,
+"shop":62331,
+"shop-two":62332,
+"shopping-basket":62333,
+"shopping-cart":62334,
+"shuffle":62335,
+"signal-cellular-0-bar":62336,
+"signal-cellular-1-bar":62337,
+"signal-cellular-2-bar":62338,
+"signal-cellular-3-bar":62339,
+"signal-cellular-4-bar":62340,
+"signal-cellular-connected-no-internet-0-bar":62341,
+"signal-cellular-connected-no-internet-1-bar":62342,
+"signal-cellular-connected-no-internet-2-bar":62343,
+"signal-cellular-connected-no-internet-3-bar":62344,
+"signal-cellular-connected-no-internet-4-bar":62345,
+"signal-cellular-no-sim":62346,
+"signal-cellular-null":62347,
+"signal-cellular-off":62348,
+"signal-wifi-0-bar":62349,
+"signal-wifi-1-bar":62350,
+"signal-wifi-1-bar-lock":62351,
+"signal-wifi-2-bar":62352,
+"signal-wifi-2-bar-lock":62353,
+"signal-wifi-3-bar":62354,
+"signal-wifi-3-bar-lock":62355,
+"signal-wifi-4-bar":62356,
+"signal-wifi-4-bar-lock":62357,
+"signal-wifi-off":62358,
+"sim-card":62359,
+"sim-card-alert":62360,
+"skip-next":62361,
+"skip-previous":62362,
+"slideshow":62363,
+"smartphone":62364,
+"sms":62365,
+"sms-failed":62366,
+"snooze":62367,
+"sort":62368,
+"space-bar":62369,
+"speaker":62370,
+"speaker-group":62371,
+"speaker-notes":62372,
+"speaker-phone":62373,
+"spellcheck":62374,
+"stars":62375,
+"stay-current-landscape":62376,
+"stay-current-portrait":62377,
+"stay-primary-landscape":62378,
+"stay-primary-portrait":62379,
+"stop":62380,
+"storage":62381,
+"store":62382,
+"store-mall-directory":62383,
+"straighten":62384,
+"strikethrough-s":62385,
+"style":62386,
+"subject":62387,
+"subtitles":62388,
+"supervisor-account":62389,
+"surround-sound":62390,
+"swap-calls":62391,
+"swap-horiz":62392,
+"swap-vert":62393,
+"swap-vertical-circle":62394,
+"switch-camera":62395,
+"switch-video":62396,
+"sync":62397,
+"sync-disabled":62398,
+"sync-problem":62399,
+"system-update":62400,
+"system-update-alt":62401,
+"tab":62402,
+"tab-unselected":62403,
+"tablet":62404,
+"tablet-android":62405,
+"tablet-mac":62406,
+"tag-faces":62407,
+"tap-and-play":62408,
+"terrain":62409,
+"text-format":62410,
+"textsms":62411,
+"texture":62412,
+"theaters":62413,
+"thumb-down":62414,
+"thumb-up":62415,
+"thumbs-up-down":62416,
+"time-to-leave":62417,
+"timelapse":62418,
+"timer":62419,
+"timer-10":62420,
+"timer-3":62421,
+"timer-off":62422,
+"toc":62423,
+"today":62424,
+"toll":62425,
+"tonality":62426,
+"toys":62427,
+"track-changes":62428,
+"traffic":62429,
+"transform":62430,
+"translate":62431,
+"trending-down":62432,
+"trending-flat":62433,
+"trending-up":62434,
+"tune":62435,
+"turned-in":62436,
+"turned-in-not":62437,
+"tv":62438,
+"undo":62439,
+"unfold-less":62440,
+"unfold-more":62441,
+"usb":62442,
+"verified-user":62443,
+"vertical-align-bottom":62444,
+"vertical-align-center":62445,
+"vertical-align-top":62446,
+"vibration":62447,
+"video-library":62448,
+"videocam":62449,
+"videocam-off":62450,
+"view-agenda":62451,
+"view-array":62452,
+"view-carousel":62453,
+"view-column":62454,
+"view-comfy":62455,
+"view-compact":62456,
+"view-day":62457,
+"view-headline":62458,
+"view-list":62459,
+"view-module":62460,
+"view-quilt":62461,
+"view-stream":62462,
+"view-week":62463,
+"visibility":62464,
+"visibility-off":62465,
+"voice-chat":62466,
+"voicemail":62467,
+"volume-down":62468,
+"volume-mute":62469,
+"volume-off":62470,
+"volume-up":62471,
+"vpn-key":62472,
+"vpn-lock":62473,
+"wallpaper":62474,
+"warning":62475,
+"watch":62476,
+"wb-auto":62477,
+"wb-cloudy":62478,
+"wb-incandescent":62479,
+"wb-iridescent":62480,
+"wb-sunny":62481,
+"wc":62482,
+"web":62483,
+"whatshot":62484,
+"widgets":62485,
+"wifi":62486,
+"wifi-lock":62487,
+"wifi-tethering":62488,
+"work":62489,
+"wrap-text":62490,
+"youtube-searched-for":62491};
+
+
+var MaterialIcons=createIconSet(glyphMap,'MaterialIcons','Fonts/MaterialIcons.ttf');
+
+module.exports = MaterialIcons;
+module.exports.glyphMap = glyphMap;
+});
+__d('createIconSet',["lodash/index.js","react-native/Libraries/react-native/react-native.js","TypefaceTextView"],function(global, require, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};function _objectWithoutProperties(obj,keys){var target={};for(var i in obj) {if(keys.indexOf(i) >= 0)continue;if(!Object.prototype.hasOwnProperty.call(obj,i))continue;target[i] = obj[i];}return target;}
+
+
+
+
+
+var _=require('lodash/index.js');
+var React=require('react-native/Libraries/react-native/react-native.js');var 
+
+View=
+
+
+
+
+
+
+
+
+React.View;var Text=React.Text;var StyleSheet=React.StyleSheet;var TouchableHighlight=React.TouchableHighlight;var TabBarIOS=React.TabBarIOS;var requireNativeComponent=React.requireNativeComponent;var NativeModules=React.NativeModules;var Platform=React.Platform;var processColor=React.processColor;
+
+var NativeIconAPI=NativeModules.RNVectorIconsManager || NativeModules.RNVectorIconsModule;
+
+var DEFAULT_ICON_SIZE=12;
+var TAB_BAR_ICON_SIZE=30;
+var DEFAULT_ICON_COLOR='black';
+var IOS7_BLUE='#007AFF';
+var DEFAULT_BUTTON_ICON_SIZE=20;
+var DEFAULT_BUTTON_ICON_COLOR='white';
+var DEFAULT_BUTTON_RADIUS=5;
+var DEFAULT_BUTTON_BACKGROUND=IOS7_BLUE;
+
+var TypefaceTextView;
+
+if(Platform.OS === 'android'){
+TypefaceTextView = require('TypefaceTextView');}
+
+
+function createIconSet(glyphMap,fontFamily,fontFile){
+var Icon=React.createClass({displayName:'Icon',
+propTypes:{
+name:React.PropTypes.oneOf(Object.keys(glyphMap)).isRequired,
+size:React.PropTypes.number,
+color:React.PropTypes.string},
+
+
+setNativeProps:function(nativeProps){
+this._root.setNativeProps(nativeProps);},
+
+
+render:function(){var _this=this;var _props=
+this.props;var name=_props.name;var size=_props.size;var color=_props.color;var style=_props.style;var props=_objectWithoutProperties(_props,['name','size','color','style']);
+
+var glyph=glyphMap[name] || '?';
+if(typeof glyph === 'number'){
+glyph = String.fromCharCode(glyph);}
+
+
+size = size || DEFAULT_ICON_SIZE;
+color = color || DEFAULT_ICON_COLOR;
+
+var styleDefaults={
+fontSize:size,
+color:color};
+
+
+props.style = [styleDefaults,style];
+props.ref = function(component){return _this._root = component;};
+
+
+
+if(Platform.OS === 'android'){
+
+styleDefaults.width = size;
+styleDefaults.height = size;
+styleDefaults.lineHeight = size;
+return React.createElement(TypefaceTextView,_extends({},props,{fontFile:fontFile}),glyph,this.props.children);}
+
+
+styleDefaults.fontFamily = fontFamily;
+return React.createElement(Text,props,glyph,this.props.children);}});
+
+
+
+var styles=StyleSheet.create({
+container:{
+flexDirection:'row',
+justifyContent:'flex-start',
+alignItems:'center',
+padding:8},
+
+touchable:{
+overflow:'hidden'},
+
+icon:{
+marginRight:10},
+
+text:{
+fontWeight:'600',
+backgroundColor:'transparent'}});
+
+
+
+var IconButton=React.createClass({displayName:'IconButton',
+getDefaultProps:function(){
+return {
+size:DEFAULT_BUTTON_ICON_SIZE,
+color:DEFAULT_BUTTON_ICON_COLOR,
+backgroundColor:DEFAULT_BUTTON_BACKGROUND,
+borderRadius:DEFAULT_BUTTON_RADIUS};},
+
+
+
+render:function(){var _props2=
+
+
+
+
+
+this.props;var style=_props2.style;var iconStyle=_props2.iconStyle;var children=_props2.children;var props=_objectWithoutProperties(_props2,['style','iconStyle','children']);
+
+var iconProps=_.pick(props,Object.keys(Text.propTypes),'style','name','size','color');
+var touchableProps=_.pick(props,Object.keys(TouchableHighlight.propTypes));
+props = _.omit(
+props,
+Object.keys(iconProps),
+Object.keys(touchableProps),
+'iconStyle',
+'borderRadius',
+'backgroundColor');
+
+iconProps.style = this.props.iconStyle?[styles.icon,this.props.iconStyle]:styles.icon;
+
+var colorStyle=_.pick(this.props,'color');
+var blockStyle=_.pick(this.props,'backgroundColor','borderRadius');
+
+if(_.isString(children)){
+children = React.createElement(Text,{style:[styles.text,colorStyle]},children);}
+
+
+return (
+React.createElement(TouchableHighlight,_extends({style:[styles.touchable,blockStyle]},touchableProps),
+React.createElement(View,_extends({
+style:[styles.container,blockStyle,style]},
+props),
+
+React.createElement(Icon,iconProps),
+children)));}});
+
+
+
+
+
+
+var imageSourceCache={};
+
+var getImageSource=function(name,size,color){
+if(!NativeIconAPI){
+if(Platform.OS === 'android'){
+throw new Error('RNVectorIconsModule not available, did you properly integrate the module?');}
+
+throw new Error('RNVectorIconsManager not available, did you add the library to your project and link with libRNVectorIcons.a?');}
+
+
+var glyph=glyphMap[name] || '?';
+if(typeof glyph === 'number'){
+glyph = String.fromCharCode(glyph);}
+
+size = size || DEFAULT_ICON_SIZE;
+color = color || DEFAULT_ICON_COLOR;
+
+if(processColor){
+color = processColor(color);}
+
+
+var cacheKey=glyph + ':' + size + ':' + color;
+
+return new Promise(function(resolve,reject){
+var cached=imageSourceCache[cacheKey];
+if(typeof cached !== 'undefined'){
+if(!cached || cached instanceof Error){reject(cached);}
+return resolve({uri:cached});}
+
+NativeIconAPI.getImageForFont(Platform.OS === 'android'?fontFile:fontFamily,glyph,size,color,function(err,image){
+if(typeof err === 'string'){
+err = new Error(err);}
+
+imageSourceCache[cacheKey] = image || err || false;
+if(!err && image){
+return resolve({uri:image});}
+
+reject(err);});});};
+
+
+
+
+
+var TabBarItem=React.createClass({displayName:'TabBarItem',
+propTypes:{
+iconName:React.PropTypes.oneOf(Object.keys(glyphMap)).isRequired,
+selectedIconName:React.PropTypes.oneOf(Object.keys(glyphMap)),
+iconSize:React.PropTypes.number},
+
+
+updateIconSources:function(){var _this2=this;
+var size=this.props.iconSize || TAB_BAR_ICON_SIZE;
+if(this.props.iconName){
+getImageSource(this.props.iconName,size).then(function(icon){return _this2.setState({icon:icon});});}
+
+if(this.props.selectedIconName){
+getImageSource(this.props.selectedIconName,size).then(function(selectedIcon){return _this2.setState({selectedIcon:selectedIcon});});}},
+
+
+
+componentWillMount:function(){
+this.updateIconSources();},
+
+
+componentWillReceiveProps:function(nextProps){
+var keys=Object.keys(TabBarItem.propTypes);
+if(!_.isEqual(_.pick(nextProps,keys),_.pick(this.props,keys))){
+this.updateIconSources();}},
+
+
+
+render:function(){
+return React.createElement(TabBarIOS.Item,_extends({},this.props,this.state));}});
+
+
+
+Icon.Button = IconButton;
+Icon.TabBarItem = TabBarItem;
+Icon.getImageSource = getImageSource;
+
+return Icon;}
+;
+
+module.exports = createIconSet;
+});
+__d('TypefaceTextView',["react-native/Libraries/react-native/react-native.js"],function(global, require, module, exports) {  'use strict';var _require=
+
+
+
+
+
+
+
+
+
+require('react-native/Libraries/react-native/react-native.js');var PropTypes=_require.PropTypes;var requireNativeComponent=_require.requireNativeComponent;
+
+var iface={
+name:'TypefaceTextView',
+propTypes:{
+fontFile:PropTypes.string,
+numberOfLines:PropTypes.number,
+scaleX:PropTypes.number,
+scaleY:PropTypes.number,
+translateX:PropTypes.number,
+translateY:PropTypes.number,
+rotation:PropTypes.number}};
+
+
+
+module.exports = requireNativeComponent('RNTypefaceTextView',iface);
+});
+__d('react-native-swiper/dist/index.js',["react-native/Libraries/react-native/react-native.js","react-timer-mixin/TimerMixin.js"],function(global, require, module, exports) {  'use strict';
+
+var _interopRequireWildcard=function(obj){return obj && obj.__esModule?obj:{'default':obj};};
+
+var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
+
+Object.defineProperty(exports,'__esModule',{
+value:true});
+
+
+
+
+
+
+
+
+var _React$StyleSheet$Text$View$ScrollView$TouchableOpacity=require('react-native/Libraries/react-native/react-native.js');
+
+var _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2=_interopRequireWildcard(_React$StyleSheet$Text$View$ScrollView$TouchableOpacity);
+
+
+
+
+
+
+
+var _TimerMixin=require('react-timer-mixin/TimerMixin.js');
+
+var _TimerMixin2=_interopRequireWildcard(_TimerMixin);
+
+var _Dimensions=require('Dimensions');
+
+var _Dimensions2=_interopRequireWildcard(_Dimensions);
+
+'use strict';
+var _Dimensions$get=_Dimensions2['default'].get('window');
+
+var width=_Dimensions$get.width;
+var height=_Dimensions$get.height;
+
+
+
+
+
+var styles=_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.StyleSheet.create({
+container:{
+backgroundColor:'transparent',
+position:'relative'},
+
+wrapper:{
+backgroundColor:'transparent'},
+
+slide:{
+backgroundColor:'transparent'},
+
+pagination_x:{
+position:'absolute',
+bottom:25,
+left:0,
+right:0,
+flexDirection:'row',
+flex:1,
+justifyContent:'center',
+alignItems:'center',
+backgroundColor:'transparent'},
+
+pagination_y:{
+position:'absolute',
+right:15,
+top:0,
+bottom:0,
+flexDirection:'column',
+flex:1,
+justifyContent:'center',
+alignItems:'center',
+backgroundColor:'transparent'},
+
+title:{
+height:30,
+justifyContent:'center',
+position:'absolute',
+paddingLeft:10,
+bottom:-30,
+left:0,
+flexWrap:'nowrap',
+width:250,
+backgroundColor:'transparent'},
+
+buttonWrapper:{
+backgroundColor:'transparent',
+flexDirection:'row',
+position:'absolute',
+top:0,
+left:0,
+flex:1,
+paddingHorizontal:10,
+paddingVertical:10,
+justifyContent:'space-between',
+alignItems:'center'},
+
+
+buttonText:{
+fontSize:50,
+color:'#007aff',
+fontFamily:'Arial'}});
+
+exports['default'] = _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createClass({
+displayName:'index',
+
+
+
+
+
+propTypes:{
+horizontal:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+children:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.node.isRequired,
+style:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View.propTypes.style,
+pagingEnabled:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+showsHorizontalScrollIndicator:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+showsVerticalScrollIndicator:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+bounces:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+scrollsToTop:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+removeClippedSubviews:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+automaticallyAdjustContentInsets:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+showsPagination:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+showsButtons:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+loop:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+autoplay:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+autoplayTimeout:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.number,
+autoplayDirection:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.bool,
+index:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.number,
+renderPagination:_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].PropTypes.func},
+
+mixins:[_TimerMixin2['default']],
+
+
+
+
+
+
+getDefaultProps:function getDefaultProps(){
+return {
+horizontal:true,
+pagingEnabled:true,
+showsHorizontalScrollIndicator:false,
+showsVerticalScrollIndicator:false,
+bounces:false,
+scrollsToTop:false,
+removeClippedSubviews:true,
+automaticallyAdjustContentInsets:false,
+showsPagination:true,
+showsButtons:false,
+loop:true,
+autoplay:false,
+autoplayTimeout:2.5,
+autoplayDirection:true,
+index:0};},
+
+
+
+
+
+
+getInitialState:function getInitialState(){
+var props=this.props;
+
+var initState={
+isScrolling:false,
+autoplayEnd:false};
+
+initState.total = props.children?props.children.length || 1:0;
+
+initState.index = initState.total > 1?Math.min(props.index,initState.total - 1):0;
+
+
+initState.dir = props.horizontal == false?'y':'x';
+initState.width = props.width || width;
+initState.height = props.height || height;
+initState.offset = {};
+
+if(initState.total > 1){
+var setup=props.loop?1:initState.index;
+initState.offset[initState.dir] = initState.dir == 'y'?initState.height * setup:initState.width * setup;}
+
+
+return initState;},
+
+
+
+
+
+
+autoplayTimer:null,
+
+componentWillMount:function componentWillMount(){
+this.props = this.injectState(this.props);},
+
+
+componentDidMount:function componentDidMount(){
+this.autoplay();},
+
+
+
+
+
+autoplay:function autoplay(){
+var _this=this;
+
+if(!this.props.autoplay || this.state.isScrolling || this.state.autoplayEnd){
+return;}
+clearTimeout(this.autoplayTimer);
+
+this.autoplayTimer = this.setTimeout(function(){
+if(!_this.props.loop && (_this.props.autoplayDirection?_this.state.index == _this.state.total - 1:_this.state.index == 0))return _this.setState({
+autoplayEnd:true});
+
+_this.scrollTo(_this.props.autoplayDirection?1:-1);},
+this.props.autoplayTimeout * 1000);},
+
+
+
+
+
+
+onScrollBegin:function onScrollBegin(e){
+var _this2=this;
+
+
+this.setState({
+isScrolling:true});
+
+
+this.setTimeout(function(){
+_this2.props.onScrollBeginDrag && _this2.props.onScrollBeginDrag(e,_this2.state,_this2);});},
+
+
+
+
+
+
+
+onScrollEnd:function onScrollEnd(e){
+var _this3=this;
+
+
+this.setState({
+isScrolling:false});
+
+
+this.updateIndex(e.nativeEvent.contentOffset,this.state.dir);
+
+
+
+this.setTimeout(function(){
+_this3.autoplay();
+
+
+_this3.props.onMomentumScrollEnd && _this3.props.onMomentumScrollEnd(e,_this3.state,_this3);});},
+
+
+
+
+
+
+
+
+updateIndex:function updateIndex(offset,dir){
+
+var state=this.state;
+var index=state.index;
+var diff=offset[dir] - state.offset[dir];
+var step=dir == 'x'?state.width:state.height;
+
+
+if(!diff){
+return;}
+
+
+index = index + diff / step;
+
+if(this.props.loop){
+if(index <= -1){
+index = state.total - 1;
+offset[dir] = step * state.total;}else 
+if(index >= state.total){
+index = 0;
+offset[dir] = step;}}
+
+
+
+this.setState({
+index:index,
+offset:offset});},
+
+
+
+
+
+
+scrollTo:function scrollTo(index){
+if(this.state.isScrolling){
+return;}
+var state=this.state;
+var diff=(this.props.loop?1:0) + index + this.state.index;
+var x=0;
+var y=0;
+if(state.dir == 'x')x = diff * state.width;
+if(state.dir == 'y')y = diff * state.height;
+this.refs.scrollView && this.refs.scrollView.scrollTo(y,x);
+
+
+this.setState({
+isScrolling:true,
+autoplayEnd:false});},
+
+
+
+
+
+
+renderPagination:function renderPagination(){
+
+
+if(this.state.total <= 1){
+return null;}
+var dots=[];
+for(var i=0;i < this.state.total;i++) {
+dots.push(i === this.state.index?this.props.activeDot || _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,{style:{
+backgroundColor:'#007aff',
+width:8,
+height:8,
+borderRadius:4,
+marginLeft:3,
+marginRight:3,
+marginTop:3,
+marginBottom:3}}):this.props.dot || _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,{style:{
+backgroundColor:'rgba(0,0,0,.2)',
+width:8,
+height:8,
+borderRadius:4,
+marginLeft:3,
+marginRight:3,
+marginTop:3,
+marginBottom:3}}));}
+
+
+return _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+{pointerEvents:'none',style:[styles['pagination_' + this.state.dir],this.props.paginationStyle]},
+dots);},
+
+
+
+renderTitle:function renderTitle(){
+var child=this.props.children[this.state.index];
+var title=child && child.props.title;
+return title?_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+{style:styles.title},
+this.props.children[this.state.index].props.title):
+null;},
+
+
+renderButtons:function renderButtons(){
+var _this4=this;
+
+var nextButton=this.props.nextButton || _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.Text,
+{style:[styles.buttonText,{color:!this.props.loop && this.state.index == this.state.total - 1?'rgba(0,0,0,0)':'#007aff'}]},
+'›');
+
+
+var prevButton=this.props.prevButton || _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.Text,
+{style:[styles.buttonText,{color:!this.props.loop && this.state.index == 0?'rgba(0,0,0,0)':'#007aff'}]},
+'‹');
+
+
+return _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+{pointerEvents:'box-none',style:[styles.buttonWrapper,{width:this.state.width,height:this.state.height},this.props.buttonWrapperStyle]},
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.TouchableOpacity,
+{onPress:function(){
+return !(!_this4.props.loop && _this4.state.index == 0) && _this4.scrollTo.call(_this4,-1);}},
+
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+null,
+prevButton)),
+
+
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.TouchableOpacity,
+{onPress:function(){
+return !(!_this4.props.loop && _this4.state.index == _this4.state.total - 1) && _this4.scrollTo.call(_this4,1);}},
+
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+null,
+nextButton)));},
+
+
+
+
+
+
+
+
+
+
+injectState:function injectState(props){
+var _this5=this;
+
+
+
+
+
+
+
+
+
+for(var prop in props) {
+
+if(typeof props[prop] === 'function' && prop !== 'onMomentumScrollEnd' && prop !== 'renderPagination' && prop !== 'onScrollBeginDrag'){
+(function(){
+var originResponder=props[prop];
+props[prop] = function(e){
+return originResponder(e,_this5.state,_this5);};})();}}
+
+
+
+
+
+return props;},
+
+
+
+
+
+
+render:function render(){
+var state=this.state;
+var props=this.props;
+var children=props.children;
+var index=state.index;
+var total=state.total;
+var loop=props.loop;
+var dir=state.dir;
+var key=0;
+
+var pages=[];
+var pageStyle=[{width:state.width,height:state.height},styles.slide];
+
+
+if(total > 1){
+
+
+pages = Object.keys(children);
+if(loop){
+pages.unshift(total - 1);
+pages.push(0);}
+
+
+pages = pages.map(function(page,i){
+return _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+{style:pageStyle,key:i},
+children[page]);});}else 
+
+
+pages = _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+{style:pageStyle},
+children);
+
+
+return _React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.View,
+{style:[styles.container,{
+width:state.width,
+height:state.height}]},
+
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity2['default'].createElement(
+_React$StyleSheet$Text$View$ScrollView$TouchableOpacity.ScrollView,
+_extends({ref:'scrollView'},
+props,{
+contentContainerStyle:[styles.wrapper,props.style],
+contentOffset:state.offset,
+onScrollBeginDrag:this.onScrollBegin,
+onMomentumScrollEnd:this.onScrollEnd}),
+pages),
+
+props.showsPagination && (props.renderPagination?this.props.renderPagination(state.index,state.total,this):this.renderPagination()),
+this.renderTitle(),
+this.props.showsButtons && this.renderButtons());}});
+
+
+
+module.exports = exports['default'];
+});
+__d('react-timer-mixin/TimerMixin.js',[],function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+var GLOBAL=typeof window === 'undefined'?global:window;
+
+var setter=function(_setter,_clearer,array){
+return function(callback,delta){
+var id=_setter((function(){
+_clearer.call(this,id);
+callback.apply(this,arguments);}).
+bind(this),delta);
+
+if(!this[array]){
+this[array] = [id];}else 
+{
+this[array].push(id);}
+
+return id;};};
+
+
+
+var clearer=function(_clearer,array){
+return function(id){
+if(this[array]){
+var index=this[array].indexOf(id);
+if(index !== -1){
+this[array].splice(index,1);}}
+
+
+_clearer(id);};};
+
+
+
+var _timeouts='TimerMixin_timeouts';
+var _clearTimeout=clearer(GLOBAL.clearTimeout,_timeouts);
+var _setTimeout=setter(GLOBAL.setTimeout,_clearTimeout,_timeouts);
+
+var _intervals='TimerMixin_intervals';
+var _clearInterval=clearer(GLOBAL.clearInterval,_intervals);
+var _setInterval=setter(GLOBAL.setInterval,function(){},_intervals);
+
+var _immediates='TimerMixin_immediates';
+var _clearImmediate=clearer(GLOBAL.clearImmediate,_immediates);
+var _setImmediate=setter(GLOBAL.setImmediate,_clearImmediate,_immediates);
+
+var _rafs='TimerMixin_rafs';
+var _cancelAnimationFrame=clearer(GLOBAL.cancelAnimationFrame,_rafs);
+var _requestAnimationFrame=setter(GLOBAL.requestAnimationFrame,_cancelAnimationFrame,_rafs);
+
+var TimerMixin={
+componentWillUnmount:function(){
+this[_timeouts] && this[_timeouts].forEach(function(id){
+GLOBAL.clearTimeout(id);});
+
+this[_timeouts] = null;
+this[_intervals] && this[_intervals].forEach(function(id){
+GLOBAL.clearInterval(id);});
+
+this[_intervals] = null;
+this[_immediates] && this[_immediates].forEach(function(id){
+GLOBAL.clearImmediate(id);});
+
+this[_immediates] = null;
+this[_rafs] && this[_rafs].forEach(function(id){
+GLOBAL.cancelAnimationFrame(id);});
+
+this[_rafs] = null;},
+
+
+setTimeout:_setTimeout,
+clearTimeout:_clearTimeout,
+
+setInterval:_setInterval,
+clearInterval:_clearInterval,
+
+setImmediate:_setImmediate,
+clearImmediate:_clearImmediate,
+
+requestAnimationFrame:_requestAnimationFrame,
+cancelAnimationFrame:_cancelAnimationFrame};
+
+
+module.exports = TimerMixin;
+});
+__d('booklets/components/loader.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","react-native-progress-hud/index.ios.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var ProgressHUD=require('react-native-progress-hud/index.ios.js');var 
 
 
 Image=
@@ -66698,34 +68851,672 @@ React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.V
 
 var styles=StyleSheet.create({
 button:{
-backgroundColor:Color.black,
-borderColor:Color.white,
-borderWidth:2,
-padding:30,
-flex:1},
+backgroundColor:Color.transparent_red,
+borderColor:Color.red,
+borderWidth:1,
+padding:15,
+flex:1,
+marginLeft:5,
+marginRight:5,
+borderRadius:5},
 
 text:{
 textAlign:'center',
-fontSize:17,
-color:Color.white}});
+fontSize:13,
+color:Color.red}});
 
 
 
 module.exports = React.createClass({displayName:'exports',
+mixins:[ProgressHUD.Mixin],
 render:function(){
 return (
-React.createElement(View,null,
-React.createElement(TouchableHighlight,{style:styles.button,onPress:this.props.onPress},
-React.createElement(Text,{style:styles.text},
-this.props.text))));}});
+React.createElement(View,{style:this.props.style},
+React.createElement(ProgressHUD,{
+isVisible:true,
+isDismissible:false,
+overlayColor:'#000',
+color:Color.red})));}});
 });
-__d('booklets/components/squares.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/square.js","booklets/components/save_button.js"],function(global, require, module, exports) {  var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};var React=require('react-native/Libraries/react-native/react-native.js');
+__d('react-native-progress-hud/index.ios.js',["react-native-progress-hud/src/index.js"],function(global, require, module, exports) {  module.exports = require('react-native-progress-hud/src/index.js');
+});
+__d('react-native-progress-hud/src/index.js',["react-native/Libraries/react-native/react-native.js","react-tween-state/index.js","react-native-progress-hud/src/styles.js","react-native-progress-hud/src/images/index.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var tweenState=require('react-tween-state/index.js');var 
+
+
+Image=
+
+
+
+React.Image;var StyleSheet=React.StyleSheet;var TouchableHighlight=React.TouchableHighlight;var View=React.View;
+
+var styles=require('react-native-progress-hud/src/styles.js');
+var images=require('react-native-progress-hud/src/images/index.js');
+
+var SPIN_DURATION=1000;
+
+var ProgressHUDMixin={
+getInitialState:function(){
+return {
+is_hud_visible:false};},
+
+
+
+showProgressHUD:function(){
+this.setState({
+is_hud_visible:true});},
+
+
+
+dismissProgressHUD:function(){
+this.setState({
+is_hud_visible:false});},
+
+
+
+childContextTypes:{
+showProgressHUD:React.PropTypes.func,
+dismissProgressHUD:React.PropTypes.func},
+
+
+getChildContext:function(){
+return {
+showProgressHUD:this.showProgressHUD,
+dismissProgressHUD:this.dismissProgressHUD};}};
+
+
+
+
+var ProgressHUD=React.createClass({displayName:'ProgressHUD',
+mixins:[tweenState.Mixin],
+
+contextTypes:{
+showProgressHUD:React.PropTypes.func.isRequired,
+dismissProgressHUD:React.PropTypes.func},
+
+
+statics:{
+Mixin:ProgressHUDMixin},
+
+
+propTypes:{
+isDismissible:React.PropTypes.bool,
+isVisible:React.PropTypes.bool.isRequired,
+color:React.PropTypes.string,
+overlayColor:React.PropTypes.string},
+
+
+getDefaultProps:function(){
+return {
+isDismissible:false,
+color:'#000',
+overlayColor:'rgba(0, 0, 0, 0)'};},
+
+
+
+getInitialState:function(){
+return {
+rotate_deg:0};},
+
+
+
+componentDidMount:function(){var _this=this;
+
+this._rotateSpinner();
+
+
+this.interval = setInterval(function(){
+_this._rotateSpinner();},
+SPIN_DURATION);},
+
+
+componentWillUnmount:function(){
+clearInterval(this.interval);},
+
+
+_rotateSpinner:function(){
+this.tweenState('rotate_deg',{
+easing:tweenState.easingTypes.linear,
+duration:SPIN_DURATION,
+endValue:this.state.rotate_deg === 0?360:this.state.rotate_deg + 360});},
+
+
+
+_clickHandler:function(){
+if(this.props.isDismissible){
+this.context.dismissProgressHUD();}},
+
+
+
+render:function(){
+
+if(!this.props.isVisible){
+return React.createElement(View,null);}
+
+
+
+var deg=Math.floor(
+this.getTweeningValue('rotate_deg')).
+toString() + 'deg';
+
+return (
+
+React.createElement(TouchableHighlight,{
+key:'ProgressHUD',
+style:[styles.overlay,{
+backgroundColor:this.props.overlayColor}],
+
+onPress:this._clickHandler,
+underlayColor:this.props.overlayColor,
+activeOpacity:1},
+
+React.createElement(View,{
+style:[styles.container,{
+left:this.getTweeningValue('left')}]},
+
+
+React.createElement(Image,{
+style:[styles.spinner,{
+backgroundColor:this.props.color,
+transform:[
+{rotate:deg}]}],
+
+
+source:{
+uri:'data:image/png;base64,' + images['1x'],
+isStatic:true}},
+
+
+React.createElement(View,{style:styles.inner_spinner})))));}});
+
+
+
+
+
+
+
+
+
+
+module.exports = ProgressHUD;
+});
+__d('react-tween-state/index.js',["tween-functions/index.js"],function(global, require, module, exports) {  'use strict';
+
+var easingTypes=require('tween-functions/index.js');
+
+
+
+
+var DEFAULT_STACK_BEHAVIOR='ADDITIVE';
+var DEFAULT_EASING=easingTypes.easeInOutQuad;
+var DEFAULT_DURATION=300;
+var DEFAULT_DELAY=0;
+
+
+function returnState(state){
+return state;}
+
+
+var tweenState={
+easingTypes:easingTypes,
+stackBehavior:{
+ADDITIVE:'ADDITIVE',
+DESTRUCTIVE:'DESTRUCTIVE'}};
+
+
+
+tweenState.Mixin = {
+getInitialState:function(){
+return {
+tweenQueue:[]};},
+
+
+
+tweenState:function(a,b,c){
+
+
+
+
+
+
+
+
+if(typeof a === 'string'){
+c = b;
+b = a;
+a = returnState;}
+
+this._tweenState(a,b,c);},
+
+
+_tweenState:function(stateRefFunc,stateName,config){
+
+
+var state=this._pendingState || this.state;
+var stateRef=stateRefFunc(state);
+
+
+var newConfig={
+easing:config.easing || DEFAULT_EASING,
+duration:config.duration == null?DEFAULT_DURATION:config.duration,
+delay:config.delay == null?DEFAULT_DELAY:config.delay,
+beginValue:config.beginValue == null?stateRef[stateName]:config.beginValue,
+endValue:config.endValue,
+onEnd:config.onEnd,
+stackBehavior:config.stackBehavior || DEFAULT_STACK_BEHAVIOR};
+
+
+var newTweenQueue=state.tweenQueue;
+if(newConfig.stackBehavior === tweenState.stackBehavior.DESTRUCTIVE){
+newTweenQueue = state.tweenQueue.filter(function(item){
+return item.stateName !== stateName || item.stateRefFunc(state) !== stateRef;});}
+
+
+
+newTweenQueue.push({
+stateRefFunc:stateRefFunc,
+stateName:stateName,
+config:newConfig,
+initTime:Date.now() + newConfig.delay});
+
+
+
+
+stateRef[stateName] = newConfig.endValue;
+
+this.setState({tweenQueue:newTweenQueue});
+
+if(newTweenQueue.length === 1){
+this.startRaf();}},
+
+
+
+getTweeningValue:function(a,b){
+
+if(typeof a === 'string'){
+b = a;
+a = returnState;}
+
+return this._getTweeningValue(a,b);},
+
+
+_getTweeningValue:function(stateRefFunc,stateName){
+var state=this.state;
+var stateRef=stateRefFunc(state);
+var tweeningValue=stateRef[stateName];
+var now=Date.now();
+
+for(var i=0;i < state.tweenQueue.length;i++) {
+var item=state.tweenQueue[i];
+var itemStateRef=item.stateRefFunc(state);
+if(item.stateName !== stateName || itemStateRef !== stateRef){
+continue;}
+
+
+var progressTime=now - item.initTime > item.config.duration?
+item.config.duration:
+Math.max(0,now - item.initTime);
+
+
+
+var contrib=-item.config.endValue + item.config.easing(
+progressTime,
+item.config.beginValue,
+item.config.endValue,
+item.config.duration);
+
+
+tweeningValue += contrib;}
+
+
+return tweeningValue;},
+
+
+_rafCb:function(){
+var state=this.state;
+if(state.tweenQueue.length === 0){
+return;}
+
+
+var now=Date.now();
+var newTweenQueue=[];
+
+for(var i=0;i < state.tweenQueue.length;i++) {
+var item=state.tweenQueue[i];
+if(now - item.initTime < item.config.duration){
+newTweenQueue.push(item);}else 
+{
+item.config.onEnd && item.config.onEnd();}}
+
+
+
+
+if(!this.isMounted()){
+return;}
+
+
+this.setState({
+tweenQueue:newTweenQueue});
+
+
+requestAnimationFrame(this._rafCb);},
+
+
+startRaf:function(){
+requestAnimationFrame(this._rafCb);}};
+
+
+
+
+module.exports = tweenState;
+});
+__d('tween-functions/index.js',[],function(global, require, module, exports) {  'use strict';
+
+
+var tweenFunctions={
+linear:function(t,b,_c,d){
+var c=_c - b;
+return c * t / d + b;},
+
+easeInQuad:function(t,b,_c,d){
+var c=_c - b;
+return c * (t /= d) * t + b;},
+
+easeOutQuad:function(t,b,_c,d){
+var c=_c - b;
+return -c * (t /= d) * (t - 2) + b;},
+
+easeInOutQuad:function(t,b,_c,d){
+var c=_c - b;
+if((t /= d / 2) < 1){
+return c / 2 * t * t + b;}else 
+{
+return -c / 2 * (--t * (t - 2) - 1) + b;}},
+
+
+easeInCubic:function(t,b,_c,d){
+var c=_c - b;
+return c * (t /= d) * t * t + b;},
+
+easeOutCubic:function(t,b,_c,d){
+var c=_c - b;
+return c * ((t = t / d - 1) * t * t + 1) + b;},
+
+easeInOutCubic:function(t,b,_c,d){
+var c=_c - b;
+if((t /= d / 2) < 1){
+return c / 2 * t * t * t + b;}else 
+{
+return c / 2 * ((t -= 2) * t * t + 2) + b;}},
+
+
+easeInQuart:function(t,b,_c,d){
+var c=_c - b;
+return c * (t /= d) * t * t * t + b;},
+
+easeOutQuart:function(t,b,_c,d){
+var c=_c - b;
+return -c * ((t = t / d - 1) * t * t * t - 1) + b;},
+
+easeInOutQuart:function(t,b,_c,d){
+var c=_c - b;
+if((t /= d / 2) < 1){
+return c / 2 * t * t * t * t + b;}else 
+{
+return -c / 2 * ((t -= 2) * t * t * t - 2) + b;}},
+
+
+easeInQuint:function(t,b,_c,d){
+var c=_c - b;
+return c * (t /= d) * t * t * t * t + b;},
+
+easeOutQuint:function(t,b,_c,d){
+var c=_c - b;
+return c * ((t = t / d - 1) * t * t * t * t + 1) + b;},
+
+easeInOutQuint:function(t,b,_c,d){
+var c=_c - b;
+if((t /= d / 2) < 1){
+return c / 2 * t * t * t * t * t + b;}else 
+{
+return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;}},
+
+
+easeInSine:function(t,b,_c,d){
+var c=_c - b;
+return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;},
+
+easeOutSine:function(t,b,_c,d){
+var c=_c - b;
+return c * Math.sin(t / d * (Math.PI / 2)) + b;},
+
+easeInOutSine:function(t,b,_c,d){
+var c=_c - b;
+return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;},
+
+easeInExpo:function(t,b,_c,d){
+var c=_c - b;
+return t == 0?b:c * Math.pow(2,10 * (t / d - 1)) + b;},
+
+easeOutExpo:function(t,b,_c,d){
+var c=_c - b;
+return t == d?b + c:c * (-Math.pow(2,-10 * t / d) + 1) + b;},
+
+easeInOutExpo:function(t,b,_c,d){
+var c=_c - b;
+if(t === 0){
+b;}
+
+if(t === d){
+b + c;}
+
+if((t /= d / 2) < 1){
+return c / 2 * Math.pow(2,10 * (t - 1)) + b;}else 
+{
+return c / 2 * (-Math.pow(2,-10 * --t) + 2) + b;}},
+
+
+easeInCirc:function(t,b,_c,d){
+var c=_c - b;
+return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;},
+
+easeOutCirc:function(t,b,_c,d){
+var c=_c - b;
+return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;},
+
+easeInOutCirc:function(t,b,_c,d){
+var c=_c - b;
+if((t /= d / 2) < 1){
+return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;}else 
+{
+return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;}},
+
+
+easeInElastic:function(t,b,_c,d){
+var c=_c - b;
+var a,p,s;
+s = 1.70158;
+p = 0;
+a = c;
+if(t === 0){
+b;}else 
+if((t /= d) === 1){
+b + c;}
+
+if(!p){
+p = d * 0.3;}
+
+if(a < Math.abs(c)){
+a = c;
+s = p / 4;}else 
+{
+s = p / (2 * Math.PI) * Math.asin(c / a);}
+
+return -(a * Math.pow(2,10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;},
+
+easeOutElastic:function(t,b,_c,d){
+var c=_c - b;
+var a,p,s;
+s = 1.70158;
+p = 0;
+a = c;
+if(t === 0){
+b;}else 
+if((t /= d) === 1){
+b + c;}
+
+if(!p){
+p = d * 0.3;}
+
+if(a < Math.abs(c)){
+a = c;
+s = p / 4;}else 
+{
+s = p / (2 * Math.PI) * Math.asin(c / a);}
+
+return a * Math.pow(2,-10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;},
+
+easeInOutElastic:function(t,b,_c,d){
+var c=_c - b;
+var a,p,s;
+s = 1.70158;
+p = 0;
+a = c;
+if(t === 0){
+b;}else 
+if((t /= d / 2) === 2){
+b + c;}
+
+if(!p){
+p = d * (0.3 * 1.5);}
+
+if(a < Math.abs(c)){
+a = c;
+s = p / 4;}else 
+{
+s = p / (2 * Math.PI) * Math.asin(c / a);}
+
+if(t < 1){
+return -0.5 * (a * Math.pow(2,10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;}else 
+{
+return a * Math.pow(2,-10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * 0.5 + c + b;}},
+
+
+easeInBack:function(t,b,_c,d,s){
+var c=_c - b;
+if(s === void 0){
+s = 1.70158;}
+
+return c * (t /= d) * t * ((s + 1) * t - s) + b;},
+
+easeOutBack:function(t,b,_c,d,s){
+var c=_c - b;
+if(s === void 0){
+s = 1.70158;}
+
+return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;},
+
+easeInOutBack:function(t,b,_c,d,s){
+var c=_c - b;
+if(s === void 0){
+s = 1.70158;}
+
+if((t /= d / 2) < 1){
+return c / 2 * (t * t * (((s *= 1.525) + 1) * t - s)) + b;}else 
+{
+return c / 2 * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;}},
+
+
+easeInBounce:function(t,b,_c,d){
+var c=_c - b;
+var v;
+v = tweenFunctions.easeOutBounce(d - t,0,c,d);
+return c - v + b;},
+
+easeOutBounce:function(t,b,_c,d){
+var c=_c - b;
+if((t /= d) < 1 / 2.75){
+return c * (7.5625 * t * t) + b;}else 
+if(t < 2 / 2.75){
+return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;}else 
+if(t < 2.5 / 2.75){
+return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;}else 
+{
+return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;}},
+
+
+easeInOutBounce:function(t,b,_c,d){
+var c=_c - b;
+var v;
+if(t < d / 2){
+v = tweenFunctions.easeInBounce(t * 2,0,c,d);
+return v * 0.5 + b;}else 
+{
+v = tweenFunctions.easeOutBounce(t * 2 - d,0,c,d);
+return v * 0.5 + c * 0.5 + b;}}};
+
+
+
+
+module.exports = tweenFunctions;
+});
+__d('react-native-progress-hud/src/styles.js',["react-native/Libraries/react-native/react-native.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');var 
+
+StyleSheet=React.StyleSheet;
+
+var styles=StyleSheet.create({
+overlay:{
+alignItems:'center',
+justifyContent:'center',
+flex:1,
+position:'absolute',
+top:0,
+left:0,
+right:0,
+bottom:0},
+
+container:{
+justifyContent:'center',
+alignItems:'center',
+width:100,
+height:100,
+borderRadius:16,
+backgroundColor:'#FFFFFF'},
+
+spinner:{
+alignItems:'center',
+justifyContent:'center',
+width:50,
+height:50,
+borderRadius:50 / 2},
+
+inner_spinner:{
+width:42,
+height:42,
+borderRadius:42 / 2,
+backgroundColor:'#FFFFFF'}});
+
+
+
+module.exports = styles;
+});
+__d('react-native-progress-hud/src/images/index.js',[],function(global, require, module, exports) {  var images={
+"1x":"iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAABjlJREFUaAWVltuS3EQQRHcAY+AVm3f//+c4+At4gwjAl6VOj44iVdM9kiuip25Z1Zmr0di319fXDy8vL69PztfWy5zYPP2Ib7fb59r/vjC/18GvbLUHXu6VY89H/Ydt821xA6DsZW5M3xiPWbtnzz+dAWWM91g3n/rvCiVRvIdhzLx7e3r6Pd5Kl9yMHIOz+rTGE5EEAGM9y7RZH5x1Y/FXfRJjJvPLcQpxCYRmQqxJXN8FOC+evStLomAy/6Y4hUiIBXzleKnSJDbz1DzMp4nP2izuxH2p9fQzPuAVwmWdQBcjofTMkPdTpUt2IFMTz/KlCOYUsro1xRjrJd//AOxS7Gov9Wekz3oPohACsRkZLsMkTixBRaz8wNa/IeLJZ5aEIZeHnoS7z7kRnz0RL1eMHoLEGssURe1MAJgkI9FZzZ4+MXvchUBgb1bMsNZF0JM8PebMmTkT4z1JkLjn4GY154dXSAqAhCZBFmE+BXJJr/wYWHwcSBRmRpY7FKCfze1CJOudKYoFmBhyxYzG9sEyMV1Y4owlzr5nR1x64n5efCJckALIMcm5iLyLoScuRTC/MnYkmZUY7xXb59g/egiRBAUsBbnAnl4x5MxjYuk9E5S4lQDrYImdWfnlE+liWKbgCoexNM1LwIFnx8wkedW7d+W5Y/yDKEGAKQCAObGLrEMkzT77OMx6EpcCvlQjT/bYR+7emWcv9f2JSJhixmCsuZQ+8czAKkQxiZNokjemR+w9enYSY8SezIcQLqSpgANg62WfpWD7yTkwMyHsoSf57ulxxOHzVLrnxsP7q6UI/GjUBwuwXEScWMhCxrkKB16yXQzYz3X0xuSKUEi/t/OpkWGj7q8WlQRKzGX2zfGQ5FKw+pyj1oVAnPNpOwjwgOfkHcZVPvB7yBXCQJIAiFHH0rscrxhJJ3H6PnF2QPi/OIpSwLeIYJ+cRuxFiuiAzB1MT8yRzPcVI4aD/VuHGAwiyP+pwxNBiHNdRLV2onkfdc36yH0iNvUHUBVXOfU8EGInf31E6SH913YQ5NcpZ42rvbyPngZ+t5UQAAfgPnEMOkYy+J/r/FSHJ/JHHYTxRPKvX+nhnr6P/soOWL9agvMrZm3lO5bcml+vN1X7rc7HOu/qkNsTq6/WsJ5bT/+A6U/kAbBNZ904PTFHkuz9sc4vdX6t82cd+uSI8V7wzuKx7rM2ANuHuJG6cAVIsDE+Y8ng+fpwIPu2DsS5g5f77zoYAmdi3JO7wfecGmZ9JFeFMOSgsR4CHvZxFAJperwXiOEdwfh+U0O0s3h3pq/y4W5yDIx241KH9uIWCEwvFu/FEoFUCkEMNbCQ9h9C983E5F5iT4U7cefT7//7PQO6ML0C9CkEQeQKYT9i+NlFkCQQw3EHnjzvybhaew8cNnb1J+IFq2HqXKaXgKTTiwPLpQpxhrpGP4/78XnAmxszN75aXmhD78DMS0afAoitM4tJEjEKcm/2xTE/CJYnTuwsXn61BM+8iyWbxDMWB1FMkopR0L17/ATrfMagkpNiH172BBFjLrSngPRdQM7ct9yFpAhid4rBS5w4+8Y7+a0/ct4RLsUEZmwtiaWAHoNPrPPsxLjUsxLCjOa+xNpPQePnMi8znnkJdvK9nrMSkjw58YwYc9TZh8eoYbkzY3pDUP5qJWAWJ+Hsp7CsSwCvKSi9oiQPVjF695JrQ0Al9MYTsSl45sFQT09sPpuhlpbkjWcinGG3fWLM3Pvu1XoqsydCM0k7JGm99RmW2soU8cz7dFKAcd/LnsOvVhLrseTTE3s6nsusEWtcip2JYC8YBBFj/Wm4H3942bORMYsyP4vZC6ZbiqA3EyPxFGGt7zvks5/fJJoijPWJ6zGXzMR4+ZmILvpUTL4jXg6BK2STvARzR9aMFWCOt8Y+Y4WkgIxzfuxIIRKjYXzFdzx5Gju6JeGMwZk7oyjymRj6l1/2lSCWn/XArEzSenAZm+f8TMyll70TZal/ZXt5kbEYc7wk9WIyN3aOvNtDbfbVktxVzyWJ7Zeac7nEs2YdL0E9eGNnZrXDExGIT2LGWTfWg9EytgaZXs+acXpmydPYMa35RAAD8pBj5vpZjZ71LXwgbV0vYXLj9NTZm6R7Dka7/Q+G5FcOipn+rwAAAABJRU5ErkJggg=="};
+
+
+module.exports = images;
+});
+__d('booklets/components/squares.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/square.js","booklets/components/progress_bar.js"],function(global, require, module, exports) {  var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
 
 var SearchStep=require('booklets/components/search_step.js');
 var Color=require('booklets/components/color.js');
 var Square=require('booklets/components/square.js');
-var SaveButton=require('booklets/components/save_button.js');var 
+var ProgressBar=require('booklets/components/progress_bar.js');var 
 
 
 Image=
@@ -66735,42 +69526,13 @@ Image=
 
 React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.View;var TouchableHighlight=React.TouchableHighlight;
 
+
 var styles=StyleSheet.create({
 squaresContainer:{
 flex:1,
 flexDirection:'row',
 flexWrap:'wrap',
-justifyContent:'flex-start'},
-
-square:{
-padding:5,
-margin:5,
-width:70,
-height:90,
-marginTop:10,
-backgroundColor:Color.white,
-borderColor:Color.light_blue,
-borderWidth:1},
-
-squarePhoto:{
-height:30},
-
-squareName:{
-paddingTop:10,
-fontSize:10,
-color:Color.black},
-
-addVenuePlus:{
-textAlign:'center',
-height:30,
-fontSize:25,
-color:Color.dark_gray},
-
-addVenueText:{
-paddingTop:5,
-fontSize:10,
-textAlign:'center',
-color:Color.black}});
+justifyContent:'flex-start'}});
 
 
 
@@ -66786,6 +69548,7 @@ this.setState({editing_id:square.id});},
 render:function(){var _this=this;
 return (
 React.createElement(View,{style:styles.container},
+React.createElement(ProgressBar,{squares:this.props.squares}),
 React.createElement(View,{style:styles.squaresContainer},
 _.map(this.props.squares,function(square){
 return (
@@ -66796,12 +69559,7 @@ onLongPress:function(e){return _this.handleLongPress(square);},
 editing:square.id == _this.state.editing_id,
 onDestroy:_this.props.destroySquare,
 addVenue:_this.props.addVenue},
-square)));}),
-
-
-
-
-React.createElement(SaveButton,{onPress:this.props.print,text:'Print my map'}))));}});
+square)));}))));}});
 });
 __d('booklets/components/square.js',["react-native/Libraries/react-native/react-native.js","booklets/components/empty_square.js","booklets/components/filled_square.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 
@@ -66815,8 +69573,9 @@ return React.createElement(EmptySquare,this.props);}else
 {
 return React.createElement(FilledSquare,this.props);}}});
 });
-__d('booklets/components/empty_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/destroy_button.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+__d('booklets/components/empty_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","MaterialIcons","booklets/components/search_step.js","booklets/components/color.js","booklets/components/destroy_button.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
+var Icon=require('MaterialIcons');
 
 var SearchStep=require('booklets/components/search_step.js');
 var Color=require('booklets/components/color.js');
@@ -66833,22 +69592,32 @@ React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.V
 var styles=StyleSheet.create({
 square:{
 padding:5,
-margin:5,
-width:70,
+marginBottom:10,
+marginRight:5,
+marginLeft:5,
+width:90,
 height:90,
-marginTop:10,
 backgroundColor:Color.white,
 borderColor:Color.light_blue,
 borderWidth:1},
 
-squarePhoto:{
-height:30},
+icon:{
+color:Color.light_blue,
+textAlign:'center',
+paddingTop:15}});
 
-squareName:{
-paddingTop:10,
-fontSize:10,
-color:Color.black}});
 
+
+const ICON_CATEGORY_MAPPINGS={
+cafe:'local-cafe',
+food:'local-dining',
+nightlife:'local-bar',
+outdoors:'terrain',
+shop:'local-grocery-store',
+camping:'terrain',
+accomodation:'local-hotel',
+sports:'directions-run',
+text:'text-format'};
 
 
 module.exports = React.createClass({displayName:'exports',
@@ -66858,7 +69627,8 @@ React.createElement(TouchableHighlight,{
 style:styles.square,
 onPress:function(e){return _this.props.addVenue(_this.props.id);}},
 
-React.createElement(View,null)));}});
+React.createElement(View,null,
+React.createElement(Icon,{style:styles.icon,name:ICON_CATEGORY_MAPPINGS[this.props.category],size:50}))));}});
 });
 __d('booklets/components/destroy_button.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -66877,8 +69647,8 @@ React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.V
 var styles=StyleSheet.create({
 bubble:{
 position:'absolute',
-top:0,
-left:40,
+top:-10,
+left:65,
 height:40,
 width:40,
 backgroundColor:Color.black,
@@ -66902,12 +69672,16 @@ return (
 React.createElement(TouchableHighlight,{style:styles.bubble,onPress:this.props.onPress},
 React.createElement(Text,{style:styles.symbol},'X')));}});
 });
-__d('booklets/components/filled_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/destroy_button.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
+__d('booklets/components/filled_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/search_step.js","booklets/components/color.js","booklets/components/destroy_button.js","booklets/components/venue_item.js","booklets/components/cover_item.js","booklets/components/text_item.js","booklets/components/numbers_item.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
 
 var SearchStep=require('booklets/components/search_step.js');
 var Color=require('booklets/components/color.js');
-var DestroyButton=require('booklets/components/destroy_button.js');var 
+var DestroyButton=require('booklets/components/destroy_button.js');
+var VenueItem=require('booklets/components/venue_item.js');
+var CoverItem=require('booklets/components/cover_item.js');
+var TextItem=require('booklets/components/text_item.js');
+var NumbersItem=require('booklets/components/numbers_item.js');var 
 
 
 Image=
@@ -66920,21 +69694,14 @@ React.Image;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.V
 var styles=StyleSheet.create({
 square:{
 padding:5,
-margin:5,
-width:70,
+paddingBottom:0,
+marginRight:5,
+marginLeft:5,
+width:90,
 height:90,
-marginTop:10,
 backgroundColor:Color.white,
 borderColor:Color.light_blue,
-borderWidth:1},
-
-squarePhoto:{
-height:30},
-
-squareName:{
-paddingTop:10,
-fontSize:10,
-color:Color.black}});
+borderWidth:1}});
 
 
 
@@ -66948,24 +69715,35 @@ console.log('press in');},
 pressOut:function(){
 console.log('press out');},
 
+item:function(){
+if(this.props.category == 'cover'){
+return React.createElement(CoverItem,this.props);}else 
+if(this.props.category == 'text'){
+return React.createElement(TextItem,this.props);}else 
+if(this.props.category == 'numbers'){
+return React.createElement(NumbersItem,this.props);}else 
+{
+return React.createElement(VenueItem,this.props);}},
+
+
+onPress:function(){
+if(this.props.category == 'numbers')return;
+
+this.props.onPress(this.props);},
+
 render:function(){var _this=this;
 return (
 React.createElement(View,null,
 React.createElement(TouchableHighlight,{
 style:styles.square,
-onPress:function(e){return _this.props.onPress(_this.props.id);},
+onPress:function(e){return _this.onPress();},
 onLongPress:this.props.onLongPress,
 onPressIn:this.pressIn,
 onPressOut:this.pressOut},
 
+
 React.createElement(View,null,
-React.createElement(Image,{
-style:styles.squarePhoto,
-source:{uri:this.props.photo_url}}),
-
-
-React.createElement(Text,{style:styles.squareName},
-this.props.name))),
+this.item())),
 
 
 
@@ -66974,7 +69752,172 @@ React.createElement(DestroyButton,{
 show:this.props.editing,
 onPress:function(e){return _this.destroy();}})));}});
 });
-__d('booklets/components/email.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/square_info_box.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/venue_item.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+squarePhoto:{
+height:50},
+
+squareName:{
+paddingTop:5,
+fontSize:10,
+color:Color.black}});
+
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){
+return (
+React.createElement(View,null,
+React.createElement(Image,{
+style:styles.squarePhoto,
+source:{uri:this.props.photo_url}}),
+
+
+React.createElement(Text,{style:styles.squareName},
+_.trunc(this.props.name,23))));}});
+});
+__d('booklets/components/cover_item.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+squarePhoto:{
+height:50,
+width:50,
+borderRadius:30},
+
+squareName:{
+fontSize:10,
+color:Color.black},
+
+container:{
+alignItems:'center'}});
+
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){
+return (
+React.createElement(View,{style:styles.container},
+React.createElement(Image,{
+style:styles.squarePhoto,
+source:{uri:this.props.photo_url}}),
+
+
+React.createElement(Text,{style:styles.squareName},
+_.trunc(this.props.name,23))));}});
+});
+__d('booklets/components/text_item.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+squareName:{
+fontSize:6,
+color:Color.grey,
+padding:5},
+
+container:{
+alignItems:'center'}});
+
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){
+return (
+React.createElement(View,{style:styles.container},
+React.createElement(Text,{style:styles.squareName},
+_.trunc(this.props.description,300))));}});
+});
+__d('booklets/components/numbers_item.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+squareName:{
+fontSize:6,
+color:Color.grey,
+paddingTop:30},
+
+container:{
+alignItems:'center'}});
+
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){
+return (
+React.createElement(View,{style:styles.container},
+React.createElement(Text,{style:styles.squareName},'Map legend')));}});
+});
+__d('booklets/components/email.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/url.js"],function(global, require, module, exports) {  'use strict';
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
