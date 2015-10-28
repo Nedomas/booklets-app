@@ -6,17 +6,26 @@ var {
 
 module.exports = class Url {
   static serverUrl() {
-    return 'https://booklets.herokuapp.com';
-    // return 'http://localhost:3000';
+    // return 'https://booklets.herokuapp.com';
+    return 'http://localhost:3000';
     // return 'http://7da9610b.ngrok.com';
   }
 
-  static createBooklet() {
-    return `${this.serverUrl()}/booklets/create`;
+  static createUser() {
+    console.log('cr');
+    return `${this.serverUrl()}/users/create`;
   }
 
-  static allSquares() {
-    return `${this.serverUrl()}/squares/${this.booklet_id}/all`;
+  static allBooklets() {
+    return `${this.serverUrl()}/booklets/${this.user_id}/all`;
+  }
+
+  static createBooklet() {
+    return `${this.serverUrl()}/booklets/${this.user_id}/create`;
+  }
+
+  static allSquares(booklet_id) {
+    return `${this.serverUrl()}/squares/${booklet_id}/all`;
   }
 
   static venuesSearch() {
