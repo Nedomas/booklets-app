@@ -78,6 +78,7 @@ module.exports = React.createClass({
   },
   componentDidMount() {
     this.refs.swiper.scrollTo(this.initial());
+    this.forceUpdate();
   },
   change(state) {
     this.props.onChange(CATEGORIES[state.index]);
@@ -86,9 +87,9 @@ module.exports = React.createClass({
     return (
       <View style={styles.wrapper} >
         <Swiper
-          showsButtons={true}
-          width={300}
-          height={60}
+          showsButtons={false}
+          width={350}
+          height={80}
           showsPagination={false}
           nextButton={this.nextButton()}
           prevButton={this.prevButton()}

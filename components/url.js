@@ -12,7 +12,6 @@ module.exports = class Url {
   }
 
   static createUser() {
-    console.log('cr');
     return `${this.serverUrl()}/users/create`;
   }
 

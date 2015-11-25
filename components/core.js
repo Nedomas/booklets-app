@@ -40,12 +40,14 @@ module.exports = React.createClass({
     this.event_emitter.emit('rightButtonPress', {});
   },
   handleLeftButtonPress(data) {
-    this.refs.sidebar.openMenu()
+    this.refs.sidebar.toggleMenu()
   },
   async onNewMap() {
     var booklet_id = await this.createBooklet();
     this.setState({ current_booklet_id: booklet_id });
     this.getBooklets();
+    this.refs.navigator.replace(this.navigatorInitialRoute());
+    this.refs.sidebar.closeMenu();
   },
   onChangeMap(booklet_id) {
     this.setState({ current_booklet_id: booklet_id });
