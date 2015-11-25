@@ -4,6 +4,7 @@ var React = require('react-native');
 var EventEmitter = require('EventEmitter');
 var Subscribable = require('Subscribable');
 var SideMenu = require('react-native-side-menu');
+var _ = require('lodash');
 
 var Url = require('./url');
 var Cards = require('./cards');
@@ -45,10 +46,11 @@ module.exports = React.createClass({
     var booklet_id = await this.createBooklet();
     this.setState({ current_booklet_id: booklet_id });
     this.getBooklets();
-    this.refs.sidebar.openMenu()
   },
   onChangeMap(booklet_id) {
     this.setState({ current_booklet_id: booklet_id });
+    this.refs.navigator.replace(this.navigatorInitialRoute());
+    this.refs.sidebar.closeMenu();
   },
   menu() {
     return (
@@ -121,25 +123,35 @@ module.exports = React.createClass({
       });
     });
   },
+  currentBooklet: function() {
+    return _.detect(this.state.booklets, (booklet) => {
+      return booklet.id == this.state.current_booklet_id;
+    });
+  },
+  navigatorInitialRoute: function() {
+    // TODO use router
+    return {
+      title: 'Your Guide' || this.currentBooklet().name,
+      leftButtonTitle: 'Guides',
+      rightButtonTitle: 'Clear',
+      component: Cards,
+      onLeftButtonPress: this.handleLeftButtonPress,
+      onRightButtonPress: this.handleRightButtonPress,
+      passProps: {
+        events: this.event_emitter,
+        booklet_id: this.state.current_booklet_id,
+      }
+    };
+  },
   render: function() {
     if (!this.state.current_booklet_id) return <View/>
 
     return (
       <SideMenu ref='sidebar' menu={this.menu()}>
         <NavigatorIOS
+          ref='navigator'
           style={styles.container}
-          initialRoute={{
-            title: 'Your Guide',
-            leftButtonTitle: 'Maps',
-            rightButtonTitle: 'Clear',
-            component: Cards,
-            onLeftButtonPress: this.handleLeftButtonPress,
-            onRightButtonPress: this.handleRightButtonPress,
-            passProps: {
-              events: this.event_emitter,
-              booklet_id: this.state.current_booklet_id,
-            }
-          }}
+          initialRoute={this.navigatorInitialRoute()}
         />
       </SideMenu>
     );
