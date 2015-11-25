@@ -41,12 +41,14 @@ module.exports = React.createClass({
   handleLeftButtonPress(data) {
     this.refs.sidebar.openMenu()
   },
-  onNewMap() {
-    this.createBooklet();
+  async onNewMap() {
+    var booklet_id = await this.createBooklet();
+    this.setState({ current_booklet_id: booklet_id });
+    this.getBooklets();
     this.refs.sidebar.openMenu()
   },
   onChangeMap(booklet_id) {
-    console.log('ch');
+    this.setState({ current_booklet_id: booklet_id });
   },
   menu() {
     return (
@@ -55,6 +57,7 @@ module.exports = React.createClass({
         onNew={this.onNewMap}
         onChange={this.onChangeMap}
         booklets={this.state.booklets}
+        current_booklet_id={this.state.current_booklet_id}
       />
     );
   },
@@ -76,8 +79,8 @@ module.exports = React.createClass({
       },
     }
 
-    let a = await fetch(Url.createBooklet(), opts);
-    return 'Hello';
+    var resp = await fetch(Url.createBooklet(), opts);
+    return JSON.parse(resp._bodyText).booklet_id;
   },
   async createUser() {
     var opts = {

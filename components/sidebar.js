@@ -39,8 +39,8 @@ var styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: Color.red,
+    borderLeftWidth: 5,
+    borderLeftColor: Color.mirage_black,
   },
   menuItemText: {
     color: Color.white,
@@ -57,24 +57,33 @@ var styles = StyleSheet.create({
     color: Color.white,
     fontSize: 14,
   },
+  active: {
+    borderLeftWidth: 5,
+    borderLeftColor: Color.red,
+  },
 });
 
 module.exports = React.createClass({
+  activeStyle: function(booklet) {
+    if (booklet.id != this.props.current_booklet_id) return {};
+
+    return styles.active;
+  },
   render: function() {
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.menuHeading}>Your Maps</Text>
+        <Text style={styles.menuHeading}>Your Guides</Text>
 
         {_.map(this.props.booklets, (booklet) => {
           return (
-            <TouchableHighlight style={styles.menuItem} onPress={(e) => this.props.onChange(booklet.id)}>
+            <TouchableHighlight style={[styles.menuItem, this.activeStyle(booklet)]} onPress={(e) => this.props.onChange(booklet.id)}>
               <Text style={styles.menuItemText}>{booklet.name}</Text>
             </TouchableHighlight>
           );
         })}
 
         <TouchableHighlight style={styles.actionItem} onPress={this.props.onNew}>
-          <Text style={styles.actionItemText}>+ NEW MAP</Text>
+          <Text style={styles.actionItemText}>+ NEW GUIDE</Text>
         </TouchableHighlight>
       </ScrollView>
     );
