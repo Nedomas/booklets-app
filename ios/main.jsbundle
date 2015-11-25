@@ -53567,16 +53567,25 @@ Object.keys(componentOrElement));}
 
 module.exports = findDOMNode;
 });
-__d('booklets/components/core.js',["react-native/Libraries/react-native/react-native.js","EventEmitter","booklets/components/cards.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/core.js',["react-native/Libraries/react-native/react-native.js","EventEmitter","Subscribable","react-native-side-menu/index.js","booklets/components/url.js","booklets/components/cards.js","booklets/components/sidebar.js"],function(global, require, module, exports) {  'use strict';
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var EventEmitter=require('EventEmitter');
-var Cards=require('booklets/components/cards.js');var 
+var Subscribable=require('Subscribable');
+var SideMenu=require('react-native-side-menu/index.js');
+
+var Url=require('booklets/components/url.js');
+var Cards=require('booklets/components/cards.js');
+var Sidebar=require('booklets/components/sidebar.js');var 
 
 
 NavigatorIOS=
 
-React.NavigatorIOS;var StyleSheet=React.StyleSheet;
+
+
+
+
+React.NavigatorIOS;var StyleSheet=React.StyleSheet;var ScrollView=React.ScrollView;var Text=React.Text;var AsyncStorage=React.AsyncStorage;var View=React.View;
 
 var styles=StyleSheet.create({
 container:{
@@ -53584,24 +53593,537 @@ flex:1}});
 
 
 
+const USER_STORAGE_KEY='@booklets:user_id';
+
 module.exports = React.createClass({displayName:'exports',
+getInitialState:function(){
+return {
+current_booklet_id:null};},
+
+
 componentWillMount:function(){
 this.event_emitter = new EventEmitter();},
 
 handleRightButtonPress:function(data){
 this.event_emitter.emit('rightButtonPress',{});},
 
-render:function(){
+handleLeftButtonPress:function(data){
+this.refs.sidebar.openMenu();},
+
+onNewMap:function(){
+this.createBooklet();
+this.refs.sidebar.openMenu();},
+
+onChangeMap:function(booklet_id){
+console.log('ch');},
+
+menu:function(){
 return (
+React.createElement(Sidebar,{
+touchToClose:true,
+onNew:this.onNewMap,
+onChange:this.onChangeMap,
+booklets:this.state.booklets}));},
+
+
+
+componentDidMount:function(){
+this.getBooklets();},
+
+ensureUser:function callee$0$0(){var 
+id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(AsyncStorage.getItem(USER_STORAGE_KEY));case 2:id = context$1$0.sent;if(!
+id){context$1$0.next = 5;break;}return context$1$0.abrupt('return',Url.user_id = id);case 5:context$1$0.next = 7;return regeneratorRuntime.awrap(
+
+this.createUser());case 7:Url.user_id = context$1$0.sent;case 8:case 'end':return context$1$0.stop();}},null,this);},
+
+createBooklet:function callee$0$0(){var 
+opts,
+
+
+
+
+
+
+
+a;return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};context$1$0.next = 3;return regeneratorRuntime.awrap(fetch(Url.createBooklet(),opts));case 3:a = context$1$0.sent;return context$1$0.abrupt('return',
+'Hello');case 5:case 'end':return context$1$0.stop();}},null,this);},
+
+createUser:function callee$0$0(){var 
+opts,
+
+
+
+
+
+
+
+resp,
+user_id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};context$1$0.next = 3;return regeneratorRuntime.awrap(fetch(Url.createUser(),opts));case 3:resp = context$1$0.sent;user_id = JSON.parse(resp._bodyText).user_id;context$1$0.next = 7;return regeneratorRuntime.awrap(
+
+this.saveUserId(user_id));case 7:return context$1$0.abrupt('return',
+user_id);case 8:case 'end':return context$1$0.stop();}},null,this);},
+
+saveUserId:function callee$0$0(user_id){return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:return context$1$0.abrupt('return',
+AsyncStorage.setItem(USER_STORAGE_KEY,String(user_id)));case 1:case 'end':return context$1$0.stop();}},null,this);},
+
+getBooklets:function callee$0$0(){var 
+
+
+opts;return regeneratorRuntime.async(function callee$0$0$(context$1$0){var _this=this;while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(this.ensureUser());case 2:opts = {
+method:'GET',
+headers:{
+'Accept':'application/json',
+'Content-Type':'application/json'}};
+
+
+
+fetch(Url.allBooklets(),opts).then(function(resp){
+var booklets=JSON.parse(resp._bodyText).booklets;
+
+_this.setState({
+loading:false,
+booklets:booklets,
+current_booklet_id:_this.state.current_booklet_id || booklets[0].id});});case 4:case 'end':return context$1$0.stop();}},null,this);},
+
+
+
+render:function(){
+if(!this.state.current_booklet_id)return React.createElement(View,null);
+
+return (
+React.createElement(SideMenu,{ref:'sidebar',menu:this.menu()},
 React.createElement(NavigatorIOS,{
 style:styles.container,
 initialRoute:{
 title:'Your Guide',
-rightButtonTitle:'Clear all',
+leftButtonTitle:'Maps',
+rightButtonTitle:'Clear',
 component:Cards,
+onLeftButtonPress:this.handleLeftButtonPress,
 onRightButtonPress:this.handleRightButtonPress,
 passProps:{
-events:this.event_emitter}}}));}});
+events:this.event_emitter,
+booklet_id:this.state.current_booklet_id}}})));}});
+});
+__d('react-native-side-menu/index.js',["react-native-side-menu/styles.js","react-native/Libraries/react-native/react-native.js"],function(global, require, module, exports) {  var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();var _get=function get(object,property,receiver){if(object === null)object = Function.prototype;var desc=Object.getOwnPropertyDescriptor(object,property);if(desc === undefined){var parent=Object.getPrototypeOf(object);if(parent === null){return undefined;}else {return get(parent,property,receiver);}}else if('value' in desc){return desc.value;}else {var getter=desc.get;if(getter === undefined){return undefined;}return getter.call(receiver);}};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}function _inherits(subClass,superClass){if(typeof superClass !== 'function' && superClass !== null){throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);}subClass.prototype = Object.create(superClass && superClass.prototype,{constructor:{value:subClass,enumerable:false,writable:true,configurable:true}});if(superClass)Object.setPrototypeOf?Object.setPrototypeOf(subClass,superClass):subClass.__proto__ = superClass;}const styles=require('react-native-side-menu/styles.js');
+const React=require('react-native/Libraries/react-native/react-native.js');const 
+Dimensions=React.Dimensions;const Animated=React.Animated;
+const deviceScreen=Dimensions.get('window');const 
+
+
+PanResponder=
+
+
+
+React.PanResponder;const View=React.View;const TouchableWithoutFeedback=React.TouchableWithoutFeedback;const Component=React.Component;
+
+
+
+
+
+
+const openMenuOffset=deviceScreen.width * 2 / 3;
+
+
+
+
+
+const hiddenMenuOffset=0;
+
+
+
+
+
+
+const edgeHitWidth=60;
+
+
+
+
+
+
+const barrierForward=deviceScreen.width / 4;
+
+
+
+
+
+
+
+function shouldOpenMenu(dx){
+return dx > barrierForward;}var 
+
+
+SideMenu=(function(_Component){_inherits(SideMenu,_Component);
+function SideMenu(props){_classCallCheck(this,SideMenu);
+_get(Object.getPrototypeOf(SideMenu.prototype),'constructor',this).call(this,props);
+
+
+
+
+this.isOpen = false;
+
+
+
+
+
+
+this.prevLeft = 0;
+
+this.state = {
+left:new Animated.Value(0)};}_createClass(SideMenu,[{key:'getChildContext',value:
+
+
+
+function getChildContext(){
+return {
+menuActions:this.getMenuActions()};}},{key:'componentWillMount',value:
+
+
+
+
+
+
+
+function componentWillMount(){
+this.responder = PanResponder.create({
+onStartShouldSetResponderCapture:this.props.onStartShouldSetResponderCapture.bind(this),
+onMoveShouldSetPanResponder:this.handleMoveShouldSetPanResponder.bind(this),
+onPanResponderMove:this.handlePanResponderMove.bind(this),
+onPanResponderRelease:this.handlePanResponderEnd.bind(this)});}},{key:'gesturesAreEnabled',value:
+
+
+
+
+
+
+
+function gesturesAreEnabled(){var 
+disableGestures=this.props.disableGestures;
+
+if(typeof disableGestures === 'function'){
+return !disableGestures();}
+
+
+return !disableGestures;}},{key:'handleMoveShouldSetPanResponder',value:
+
+
+
+
+
+
+function handleMoveShouldSetPanResponder(e,gestureState){
+if(this.gesturesAreEnabled()){
+const x=Math.round(Math.abs(gestureState.dx));
+const y=Math.round(Math.abs(gestureState.dy));
+
+const touchMoved=x > this.props.toleranceX && y < this.props.toleranceY;
+if(this.isOpen){
+return touchMoved;}else 
+{
+const withinEdgeHitWidth=this.props.menuPosition === 'right'?
+gestureState.moveX > deviceScreen.width - edgeHitWidth:
+gestureState.moveX < edgeHitWidth;
+const swipingToOpen=this.menuPositionMultiplier() * gestureState.dx > 0;
+return withinEdgeHitWidth && touchMoved && swipingToOpen;}}
+
+
+
+return false;}},{key:'handlePanResponderMove',value:
+
+
+
+
+
+
+
+
+function handlePanResponderMove(e,gestureState){
+if(this.menuPositionMultiplier() * (
+this.state.left.__getValue() + gestureState.dx) >= 0){
+
+this.state.left.setValue(this.prevLeft + gestureState.dx);}}},{key:'handlePanResponderEnd',value:
+
+
+
+
+
+
+
+
+
+function handlePanResponderEnd(e,gestureState){
+const currentLeft=this.state.left.__getValue();
+
+const shouldOpen=this.menuPositionMultiplier() * (
+currentLeft + gestureState.dx);
+
+if(shouldOpenMenu(shouldOpen)){
+this.openMenu();}else 
+{
+this.closeMenu();}}},{key:'menuPositionMultiplier',value:
+
+
+
+
+
+
+
+function menuPositionMultiplier(){
+return this.props.menuPosition === 'right'?-1:1;}},{key:'openMenu',value:
+
+
+
+
+
+
+function openMenu(){
+const openOffset=this.menuPositionMultiplier() * (
+this.props.openMenuOffset || openMenuOffset);
+
+this.props.
+animationFunction(this.state.left,openOffset).
+start();
+
+this.prevLeft = openOffset;
+
+if(!this.isOpen){
+this.isOpen = true;
+this.props.onChange(this.isOpen);
+
+
+if(this.props.touchToClose){
+this.forceUpdate();}}}},{key:'closeMenu',value:
+
+
+
+
+
+
+
+
+function closeMenu(){
+const closeOffset=this.menuPositionMultiplier() * (
+this.props.hiddenMenuOffset || hiddenMenuOffset);
+
+this.props.
+animationFunction(this.state.left,closeOffset).
+start();
+
+this.prevLeft = closeOffset;
+
+if(this.isOpen){
+this.isOpen = false;
+this.props.onChange(this.isOpen);
+
+
+if(this.props.touchToClose){
+this.forceUpdate();}}}},{key:'toggleMenu',value:
+
+
+
+
+
+
+
+
+function toggleMenu(){
+if(this.isOpen){
+this.closeMenu();}else 
+{
+this.openMenu();}}},{key:'getContentView',value:
+
+
+
+
+
+
+
+function getContentView(){var _this=this;
+var overlay=null;
+
+if(this.isOpen && this.props.touchToClose){
+overlay = 
+React.createElement(TouchableWithoutFeedback,{onPress:this.closeMenu.bind(this)},
+React.createElement(View,{style:styles.overlay}));}var _state=
+
+
+
+
+this.state;const width=_state.width;const height=_state.height;
+
+return (
+React.createElement(Animated.View,_extends({
+style:[styles.frontView,{width:width,height:height},this.props.animationStyle(this.state.left)],
+ref:function(sideMenu){return _this.sideMenu = sideMenu;}},
+this.responder.panHandlers),
+this.props.children,
+overlay));}},{key:'getMenuActions',value:
+
+
+
+
+
+
+
+
+
+function getMenuActions(){
+return {
+close:this.closeMenu.bind(this),
+toggle:this.toggleMenu.bind(this),
+open:this.openMenu.bind(this)};}},{key:'onLayoutChange',value:
+
+
+
+function onLayoutChange(e){var _e$nativeEvent$layout=
+e.nativeEvent.layout;const width=_e$nativeEvent$layout.width;const height=_e$nativeEvent$layout.height;
+this.setState({width:width,height:height});}},{key:'render',value:
+
+
+
+
+
+
+function render(){
+return (
+React.createElement(View,{style:styles.container,onLayout:this.onLayoutChange.bind(this)},
+React.createElement(View,{style:styles.menu},
+this.props.menu),
+
+this.getContentView()));}}]);return SideMenu;})(Component);
+
+
+
+
+
+SideMenu.childContextTypes = {
+menuActions:React.PropTypes.object.isRequired};
+
+
+SideMenu.propTypes = {
+toleranceX:React.PropTypes.number,
+toleranceY:React.PropTypes.number,
+menuPosition:React.PropTypes.oneOf(['left','right']),
+onChange:React.PropTypes.func,
+touchToClose:React.PropTypes.bool,
+disableGestures:React.PropTypes.oneOfType([React.PropTypes.func,React.PropTypes.bool]),
+animationFunction:React.PropTypes.func,
+onStartShouldSetResponderCapture:React.PropTypes.func};
+
+
+SideMenu.defaultProps = {
+toleranceY:10,
+toleranceX:10,
+touchToClose:false,
+onStartShouldSetResponderCapture:function(){return true;},
+onChange:function(){},
+animationStyle:function(value){
+return {
+transform:[{
+translateX:value}]};},
+
+
+
+animationFunction:function(prop,value){
+return Animated.spring(
+prop,
+{
+toValue:value,
+friction:8});}};
+
+
+
+
+
+module.exports = SideMenu;
+});
+__d('react-native-side-menu/styles.js',["react-native/Libraries/react-native/react-native.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');var 
+
+
+StyleSheet=
+React.StyleSheet;
+
+module.exports = StyleSheet.create({
+container:{
+flex:1,
+justifyContent:'center',
+alignItems:'center'},
+
+menu:{
+flex:1,
+backgroundColor:'transparent',
+position:'absolute',
+top:0,
+left:0},
+
+frontView:{
+flex:1,
+position:'absolute',
+left:0,
+top:0,
+backgroundColor:'transparent'},
+
+overlay:{
+position:'absolute',
+top:0,
+left:0,
+bottom:0,
+right:0,
+backgroundColor:'transparent'}});
+});
+__d('booklets/components/url.js',["react-native/Libraries/react-native/react-native.js"],function(global, require, module, exports) {  var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}var React=require('react-native/Libraries/react-native/react-native.js');var 
+
+
+AsyncStorage=
+React.AsyncStorage;
+
+module.exports = (function(){function Url(){_classCallCheck(this,Url);}_createClass(Url,null,[{key:'serverUrl',value:
+function serverUrl(){
+return 'https://booklets.herokuapp.com';}},{key:'createUser',value:
+
+
+
+
+function createUser(){
+console.log('cr');
+return this.serverUrl() + '/users/create';}},{key:'allBooklets',value:
+
+
+function allBooklets(){
+return this.serverUrl() + '/booklets/' + this.user_id + '/all';}},{key:'createBooklet',value:
+
+
+function createBooklet(){
+return this.serverUrl() + '/booklets/' + this.user_id + '/create';}},{key:'allSquares',value:
+
+
+function allSquares(booklet_id){
+return this.serverUrl() + '/squares/' + booklet_id + '/all';}},{key:'venuesSearch',value:
+
+
+function venuesSearch(){
+return this.serverUrl() + '/venues/search';}},{key:'findSquare',value:
+
+
+function findSquare(square_id,venue_id){
+return this.serverUrl() + '/squares/find/' + square_id + '/' + venue_id;}},{key:'updateSquare',value:
+
+
+function updateSquare(square_id){
+return this.serverUrl() + '/squares/update/' + square_id;}},{key:'destroySquare',value:
+
+
+function destroySquare(square_id){
+return this.serverUrl() + '/squares/destroy/' + square_id;}},{key:'clearAll',value:
+
+
+function clearAll(){
+return this.serverUrl() + '/squares/' + this.booklet_id + '/clear_all';}},{key:'print',value:
+
+
+function print(){
+return this.serverUrl() + '/booklets/' + this.booklet_id + '/print';}}]);return Url;})();
 });
 __d('booklets/components/cards.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","Subscribable","booklets/components/search_step.js","booklets/components/squares.js","booklets/components/url.js","booklets/components/color.js","booklets/components/show_square.js","booklets/components/email.js","booklets/components/save_button.js","booklets/components/loader.js"],function(global, require, module, exports) {  var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -53647,7 +54169,6 @@ marginTop:160}});
 module.exports = React.createClass({displayName:'exports',
 mixins:[Subscribable.Mixin],
 getInitialState:function(){
-this.getSquares();
 this.setupReloads();
 
 return {
@@ -53667,46 +54188,18 @@ this.getSquares();},
 componentDidMount:function(){var _this=this;
 this.addListenerOn(this.props.events,'rightButtonPress',function(e){return _this.clearAll();});},
 
-createBooklet:function callee$0$0(){var 
-opts,
-
-
-
-
-
-
-
-resp,
-booklet_id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};context$1$0.next = 3;return regeneratorRuntime.awrap(fetch(Url.createBooklet(),opts));case 3:resp = context$1$0.sent;booklet_id = JSON.parse(resp._bodyText).booklet_id;context$1$0.next = 7;return regeneratorRuntime.awrap(
-
-this.saveBookletId(booklet_id));case 7:return context$1$0.abrupt('return',
-booklet_id);case 8:case 'end':return context$1$0.stop();}},null,this);},
-
-ensureBooklet:function callee$0$0(){var 
-id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(AsyncStorage.getItem(BOOKLET_STORAGE_KEY));case 2:id = context$1$0.sent;if(!
-id){context$1$0.next = 5;break;}return context$1$0.abrupt('return',Url.booklet_id = id);case 5:context$1$0.next = 7;return regeneratorRuntime.awrap(
-
-this.createBooklet());case 7:Url.booklet_id = context$1$0.sent;case 8:case 'end':return context$1$0.stop();}},null,this);},
-
-saveBookletId:function callee$0$0(booklet_id){return regeneratorRuntime.async(function callee$0$0$(context$1$0){while(1) switch(context$1$0.prev = context$1$0.next){case 0:return context$1$0.abrupt('return',
-AsyncStorage.setItem(BOOKLET_STORAGE_KEY,String(booklet_id)));case 1:case 'end':return context$1$0.stop();}},null,this);},
-
 getSquares:function callee$0$0(){var 
-
-
-opts,
-
-
-
-
+opts;return regeneratorRuntime.async(function callee$0$0$(context$1$0){var _this2=this;while(1) switch(context$1$0.prev = context$1$0.next){case 0:opts = {
+method:'GET',
+headers:{
+'Accept':'application/json',
+'Content-Type':'application/json'}};
 
 
 
-booklet_id;return regeneratorRuntime.async(function callee$0$0$(context$1$0){var _this2=this;while(1) switch(context$1$0.prev = context$1$0.next){case 0:context$1$0.next = 2;return regeneratorRuntime.awrap(this.ensureBooklet());case 2:opts = {method:'GET',headers:{'Accept':'application/json','Content-Type':'application/json'}};booklet_id = 1;
-
-fetch(Url.allSquares(),opts).then(function(resp){
+fetch(Url.allSquares(this.props.booklet_id),opts).then(function(resp){
 var squares=JSON.parse(resp._bodyText).squares;
-_this2.setState({loading:false,squares:squares});});case 5:case 'end':return context$1$0.stop();}},null,this);},
+_this2.setState({loading:false,squares:squares});});case 2:case 'end':return context$1$0.stop();}},null,this);},
 
 
 findSquare:function(square_id){
@@ -53799,6 +54292,8 @@ React.createElement(SaveButton,{onPress:this.print,text:'PRINT MY BOOKLET'})));}
 
 
 render:function(){
+if(this.props.booklet_id && !this.state.squares.length)this.getSquares();
+
 return (
 React.createElement(View,{style:styles.container},
 this.state.loading?React.createElement(Loader,{style:styles.loader}):this.squares()));}});
@@ -66155,7 +66650,7 @@ root._ = _;}}).
 
 call(this);
 });
-__d('booklets/components/search_step.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/color.js","booklets/components/progress_bar.js","booklets/components/venue_search_item.js","booklets/components/category_select.js","booklets/components/loader.js","booklets/components/url.js","booklets/components/show_square.js"],function(global, require, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
+__d('booklets/components/search_step.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/url.js","booklets/components/show_square.js","booklets/components/color.js","booklets/components/progress_bar.js","booklets/components/venue_search_item.js","booklets/components/category_select.js","booklets/components/loader.js"],function(global, require, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -66329,50 +66824,6 @@ autoFocus:true}),
 
 bottom_part));}});
 });
-__d('booklets/components/url.js',["react-native/Libraries/react-native/react-native.js"],function(global, require, module, exports) {  var _createClass=(function(){function defineProperties(target,props){for(var i=0;i < props.length;i++) {var descriptor=props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if('value' in descriptor)descriptor.writable = true;Object.defineProperty(target,descriptor.key,descriptor);}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor;};})();function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError('Cannot call a class as a function');}}var React=require('react-native/Libraries/react-native/react-native.js');var 
-
-
-AsyncStorage=
-React.AsyncStorage;
-
-module.exports = (function(){function Url(){_classCallCheck(this,Url);}_createClass(Url,null,[{key:'serverUrl',value:
-function serverUrl(){
-return 'https://booklets.herokuapp.com';}},{key:'createBooklet',value:
-
-
-
-
-function createBooklet(){
-return this.serverUrl() + '/booklets/create';}},{key:'allSquares',value:
-
-
-function allSquares(){
-return this.serverUrl() + '/squares/' + this.booklet_id + '/all';}},{key:'venuesSearch',value:
-
-
-function venuesSearch(){
-return this.serverUrl() + '/venues/search';}},{key:'findSquare',value:
-
-
-function findSquare(square_id,venue_id){
-return this.serverUrl() + '/squares/find/' + square_id + '/' + venue_id;}},{key:'updateSquare',value:
-
-
-function updateSquare(square_id){
-return this.serverUrl() + '/squares/update/' + square_id;}},{key:'destroySquare',value:
-
-
-function destroySquare(square_id){
-return this.serverUrl() + '/squares/destroy/' + square_id;}},{key:'clearAll',value:
-
-
-function clearAll(){
-return this.serverUrl() + '/squares/' + this.booklet_id + '/clear_all';}},{key:'print',value:
-
-
-function print(){
-return this.serverUrl() + '/booklets/' + this.booklet_id + '/print';}}]);return Url;})();
-});
 __d('booklets/components/show_square.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/save_button.js","booklets/components/venue_detail.js","booklets/components/text_detail.js","booklets/components/cover_detail.js"],function(global, require, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
 
 var React=require('react-native/Libraries/react-native/react-native.js');
@@ -66510,6 +66961,7 @@ dark_gray:'#B4BCCC',
 white:'#fff',
 red:'#FF3266',
 black:'#474F6E',
+mirage_black:'#191E2D',
 light_blue:'#E5EAF4',
 transparent_red:'hsla(345, 100%, 60%, .1)'};
 });
@@ -66995,7 +67447,7 @@ borderBottomRightRadius:radius}});
 
 module.exports = ProgressBar;
 });
-__d('booklets/components/venue_search_item.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/color.js","booklets/components/progress_bar.js","booklets/components/url.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/venue_search_item.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","EventEmitter","booklets/components/url.js","booklets/components/color.js","booklets/components/progress_bar.js"],function(global, require, module, exports) {  'use strict';
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -69917,7 +70369,7 @@ return (
 React.createElement(View,{style:styles.container},
 React.createElement(Text,{style:styles.squareName},'Map legend')));}});
 });
-__d('booklets/components/email.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/url.js"],function(global, require, module, exports) {  'use strict';
+__d('booklets/components/email.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","Subscribable","booklets/components/url.js","booklets/components/color.js","booklets/components/square_info_box.js"],function(global, require, module, exports) {  'use strict';
 
 var React=require('react-native/Libraries/react-native/react-native.js');
 var _=require('lodash/index.js');
@@ -69993,6 +70445,84 @@ value:this.state.email}),
 
 React.createElement(TouchableHighlight,{onPress:this.print},
 React.createElement(Text,null,'Send it to me!'))));}});
+});
+__d('booklets/components/sidebar.js',["react-native/Libraries/react-native/react-native.js","lodash/index.js","booklets/components/color.js","booklets/components/square_info_box.js","booklets/components/square_name_box.js"],function(global, require, module, exports) {  'use strict';
+
+var React=require('react-native/Libraries/react-native/react-native.js');
+var _=require('lodash/index.js');
+
+var Color=require('booklets/components/color.js');
+var SquareInfoBox=require('booklets/components/square_info_box.js');
+var SquareNameBox=require('booklets/components/square_name_box.js');var 
+
+
+StyleSheet=
+
+
+
+
+
+
+React.StyleSheet;var Text=React.Text;var TextInput=React.TextInput;var View=React.View;var ScrollView=React.ScrollView;var TouchableHighlight=React.TouchableHighlight;var Image=React.Image;
+
+var styles=StyleSheet.create({
+container:{
+flex:1,
+paddingTop:30,
+width:300,
+height:600,
+backgroundColor:Color.mirage_black,
+paddingLeft:10,
+paddingRight:10},
+
+menuHeading:{
+color:Color.white,
+fontWeight:'600',
+fontSize:20,
+paddingBottom:20},
+
+menuItem:{
+marginTop:10,
+marginBottom:10,
+paddingTop:10,
+paddingBottom:10,
+paddingLeft:10,
+borderLeftWidth:3,
+borderLeftColor:Color.red},
+
+menuItemText:{
+color:Color.white,
+fontSize:16},
+
+actionItem:{
+marginTop:10,
+marginBottom:10,
+paddingTop:10,
+paddingBottom:10,
+paddingLeft:10},
+
+actionItemText:{
+color:Color.white,
+fontSize:14}});
+
+
+
+module.exports = React.createClass({displayName:'exports',
+render:function(){var _this=this;
+return (
+React.createElement(ScrollView,{contentContainerStyle:styles.container},
+React.createElement(Text,{style:styles.menuHeading},'Your Maps'),
+
+_.map(this.props.booklets,function(booklet){
+return (
+React.createElement(TouchableHighlight,{style:styles.menuItem,onPress:function(e){return _this.props.onChange(booklet.id);}},
+React.createElement(Text,{style:styles.menuItemText},booklet.name)));}),
+
+
+
+
+React.createElement(TouchableHighlight,{style:styles.actionItem,onPress:this.props.onNew},
+React.createElement(Text,{style:styles.actionItemText},'+ NEW MAP'))));}});
 });
 ;require("booklets/index.ios.js");
 //@ sourceMappingURL=/index.ios.map?platform=ios&dev=false
