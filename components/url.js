@@ -44,11 +44,11 @@ module.exports = class Url {
     return `${this.serverUrl()}/squares/destroy/${square_id}`;
   }
 
-  static clearAll() {
-    return `${this.serverUrl()}/squares/${this.booklet_id}/clear_all`;
+  static clearAll(booklet_id) {
+    return `${this.serverUrl()}/squares/${booklet_id}/clear_all`;
   }
 
-  static print() {
-    return `${this.serverUrl()}/booklets/${this.booklet_id}/print`;
+  static print(booklet_id) {
+    return `${this.serverUrl()}/booklets/${booklet_id}/print`;
   }
 }

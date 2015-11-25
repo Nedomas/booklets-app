@@ -59,7 +59,7 @@ module.exports = React.createClass({
     this.getSquares();
   },
   componentDidMount() {
-    this.addListenerOn(this.props.events, 'rightButtonPress', (e) => this.clearAll());
+    this.addListenerOn(this.props.events, 'rightButtonPress', (e) => this.clearAll(this.props.booklet_id));
   },
   async getSquares() {
     var opts = {
@@ -91,7 +91,7 @@ module.exports = React.createClass({
     });
   },
   print() {
-    LinkingIOS.openURL(Url.print());
+    LinkingIOS.openURL(Url.print(this.props.booklet_id));
   },
   nextStepNumber() {
     return this.state.squares.length + 1;
@@ -124,7 +124,7 @@ module.exports = React.createClass({
     }
 
     this.setState({ loading: true });
-    fetch(Url.clearAll(), opts).then((resp) => {
+    fetch(Url.clearAll(this.props.booklet_id), opts).then((resp) => {
       var squares = JSON.parse(resp._bodyText).squares;
 
       this.setState({ squares: squares, loading: false });
