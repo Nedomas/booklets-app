@@ -1,5 +1,6 @@
 var React = require('react-native');
 var _ = require('lodash');
+var Dimensions = require('Dimensions');
 
 var SearchStep = require('./search_step');
 var Color = require('./color');
@@ -17,14 +18,16 @@ var {
   TouchableHighlight,
 } = React;
 
+var part = (Dimensions.get('window').width - 50) / 3;
+
 var styles = StyleSheet.create({
   square: {
     padding: 5,
     paddingBottom: 0,
     marginRight: 5,
     marginLeft: 5,
-    width: 105,
-    height: 105,
+    width: part,
+    height: part,
     backgroundColor: Color.white,
     borderColor: Color.light_blue,
     borderWidth: 1,
