@@ -3,6 +3,10 @@
 var React = require('react-native');
 var _ = require('lodash');
 
+var {
+  CameraRoll,
+} = React;
+
 var Color = require('./color');
 var SquareInfoBox = require('./square_info_box');
 var SquareNameBox = require('./square_name_box');
@@ -48,10 +52,22 @@ module.exports = React.createClass({
       />
     );
   },
+  changePicture() {
+    CameraRoll.getPhotos({ first: 1 }, (resp) => {
+      debugger;
+    }, (err) => {
+      debugger;
+    });
+  },
   render: function() {
     return (
       <View style={styles.venueCard}>
-        {this.image()}
+        <TouchableHighlight
+          style={styles.square}
+          onPress={(e) => this.changePicture()}>
+
+          {this.image()}
+        </TouchableHighlight>
 
         <SquareNameBox
           style={styles.name}
